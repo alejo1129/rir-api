@@ -94,7 +94,7 @@ flowchart TB
             PN["pink_noise.py<br/>generate_pink_noise"]
             SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
             IO["audio_io.py<br/>play_and_record"]
-            3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
+            M3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
 VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
             VM2F["filter.py<br/>filter_single_band"]
         end
@@ -118,7 +118,7 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     R3U --> R3A
     S3R --> S3U
     R3A --> S3R
-    R3A --> 3
+    R3A --> M3
     RM2 --> RF
 ```
 
