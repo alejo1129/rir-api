@@ -1,0 +1,50 @@
+[project]
+name = "rir-api"
+version = "0.1.0"
+description = "API REST para procesamiento y analisis de respuestas al impulso segun ISO 3382"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Estudiante", email = "estudiante@example.com" },
+]
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "soundfile",
+    "sounddevice",
+    "python-multipart",
+]
+
+# Dependencias de desarrollo: `uv sync` las instala por defecto (grupo "dev").
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "httpx",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
