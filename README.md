@@ -6,6 +6,7 @@ API REST para procesamiento y analisis de respuestas al impulso segun la norma I
 ![CI](https://github.com/<usuario>/<repo>/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 
+
 ## Descripcion
 
 RIR-API es el trabajo practico de Senales y Sistemas (UNTREF, 2C 2026): una API REST
@@ -20,6 +21,7 @@ ISO 3382-1.
 > diagrama de arquitectura, branching strategy) y lo va actualizando hasta M3 (seccion
 > "Validacion" con los resultados).
 
+
 ## Integrantes
 
 | Nombre | Legajo | Rol |
@@ -27,6 +29,41 @@ ISO 3382-1.
 | Fernandez, Alejo | ... | ... |
 | Garcia Nizza, Ignacio | 67573 | ... |
 | Prieto, Julian | 57543 | ... |
+
+
+## Instalación y ejecución
+
+Para ejecutar el proyecto localmente, primero se debe clonar el repositorio:
+
+```bash
+git clone https://github.com/alejo1129/rir-api.git
+cd rir-api
+```
+
+Luego se instalan las dependencias del proyecto:
+
+```bash
+uv sync
+```
+
+Para iniciar la API:
+
+```bash
+uv run uvicorn app.main:app --reload
+```
+
+Una vez iniciada, la API queda disponible en:
+
+- API: `http://localhost:8000`
+- Swagger UI: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+
+Para ejecutar los tests: 
+
+```bash
+uv run pytest -v
+```
+
 
 ## Arquitectura del Proyecto
 
