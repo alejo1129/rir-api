@@ -92,7 +92,7 @@ flowchart TB
             VM3["M3: acoustic_parameters.py"]
         end
     end
-    L["NumPy · SciPy · sounddevice"]
+    L["NumPy · SciPy · sounddevice · FastAPI · Pydantic]
     C -->|"request HTTP + JSON"| RS
     C -->|"request HTTP + JSON"| RH
     RAH -->|"valida con"| SR
@@ -103,6 +103,7 @@ flowchart TB
     SW --> L
     IO --> L
     RH --> RAH
+    RAH --> L
     classDef pendiente stroke-dasharray: 5 5
     class RM2,RM3,SM,VM2,VM3 pendiente
 ```
