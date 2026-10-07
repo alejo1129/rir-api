@@ -3,7 +3,7 @@
 API REST para procesamiento y analisis de respuestas al impulso segun la norma ISO 3382.
 
 <!-- Badge de CI: reemplazar <usuario>/<repo> por los datos del repositorio del grupo -->
-![CI](https://github.com/<usuario>/<repo>/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/alejo1129/rir-api/actions/workflows/ci.yml/badge.svg)](https://github.com/alejo1129/rir-api/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 
 
@@ -287,3 +287,11 @@ o con un archivo `.env` en la raiz (ignorado por git).
 - Schroeder, M. R. (1965). *New method of measuring reverberation time.* JASA 37(3).
 - [FastAPI](https://fastapi.tiangolo.com/) · [Pydantic](https://docs.pydantic.dev/) ·
   [uv](https://docs.astral.sh/uv/)
+
+## 🌳 Branching Strategy (Estrategia de Ramas)
+Para mantener el repositorio ordenado y evitar romper la aplicación principal:
+- La rama `main` está protegida y no se edita directamente[cite: 1].
+- Para cada tarea o funcionalidad se crea una rama específica (ej. `feature/m1-senales`, `fix/routing`)[cite: 1].
+- Los cambios se integran a `main` mediante un **Pull Request** previa revisión del equipo[cite: 1].
+- Se utiliza *conventional commits* para los mensajes (ej. `feat:`, `fix:`, `chore:`).
+
