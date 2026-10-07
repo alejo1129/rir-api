@@ -108,7 +108,7 @@ flowchart TB
     IO --> L
     RH --> RAH
     SR --> L
-    C -->|"request HTTP + JSON"| RM2
+    C -->|"request HTTP + JSON"| RF
     C -->|"request HTTP + JSON"| RU
     RU --> RA
     RF --> RM2
