@@ -117,6 +117,7 @@ flowchart TB
     RM2 -->|"valida con"| SM2
     RM2 -->|"llama a"| VM2
     VM2 --> VM2F
+    R3U --> R3A
 
 ```
 
