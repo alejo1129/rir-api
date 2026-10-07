@@ -74,7 +74,7 @@ flowchart TB
         direction TB
         subgraph R["app/routers/"]
             RH["health.py<br/>GET /health"]
-            RAH["audio_http.py<br/>wav_response"]
+            RAH["audio_http.py<br/>wav_response<br/>upload_files"]
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
             RM2["M2: /signals/synthetic-ir, filters.py"]
             RM3["M3: acoustics.py, utils.py"]
@@ -99,6 +99,7 @@ flowchart TB
     PN --> L
     SW --> L
     IO --> L
+    RH --> RAH
     classDef pendiente stroke-dasharray: 5 5
     class RM2,RM3,SM,VM2,VM3 pendiente
 ```
