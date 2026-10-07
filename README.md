@@ -125,6 +125,7 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     S3R --> S3U
     R3A --> S3R
     S3R --> S3U
+    R3A --> S3R
 
 ```
 
