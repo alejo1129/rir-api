@@ -76,7 +76,8 @@ flowchart TB
             RH["health.py<br/>GET /health"]
             RAH["audio_http.py<br/>wav_response<br/>upload_files"]
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
-            RM2["M2: /signals/synthetic-ir, filters.py"]
+            RM2["signals.py<br/>POST /signals/synthetic-ir"]
+            RF["filters.py<br/>POST /filters/single-band"]
             RM3["M3: acoustics.py, utils.py"]
         end
         subgraph SC["app/schemas/"]
@@ -105,6 +106,7 @@ flowchart TB
     RH --> RAH
     SR --> L
     C --> RM2
+    RM2 --> RF
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
