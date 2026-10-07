@@ -74,7 +74,7 @@ flowchart TB
         direction TB
         subgraph R["app/routers/"]
             R3A["acoustic.py<br/>POST /acoustic/parameters"]
-            R3U["utils.p<br/>POST /utils/smothing<br/>POST /utils/shroeder<br/>POST /utils/lundeby"]
+            R3U["utils.py<br/>POST /utils/smothing<br/>POST /utils/shroeder<br/>POST /utils/lundeby"]
             RH["health.py<br/>GET /health"]
             RAH["audio_http.py<br/>wav_response<br/>upload_files"]
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
@@ -95,7 +95,8 @@ flowchart TB
             PN["pink_noise.py<br/>generate_pink_noise"]
             SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
             IO["audio_io.py<br/>play_and_record"]
-            VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
+            3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
+VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
             VM2F["filter.py<br/>filter_single_band"]
             VM3["M3: acoustic_parameters.py"]
         end
@@ -121,7 +122,8 @@ flowchart TB
     VM2 --> VM2F
     R3U --> R3A
     S3R --> S3U
-
+    R3A --> S3R
+    S3R --> S3U
 
 ```
 
