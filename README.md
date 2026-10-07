@@ -24,7 +24,7 @@ ISO 3382-1.
 
 | Nombre | Legajo | Rol |
 |--------|--------|-----|
-| ...    | ...    | ... |
+| Julian Prieto    | 57543    | ... |
 
 ## Requisitos previos
 
