@@ -107,64 +107,6 @@ flowchart TB
     classDef pendiente stroke-dasharray: 5 5
     class RM2,RM3,SM,VM2,VM3 pendiente
 ```
-```mermaid
-flowchart TB
-    C["Cliente<br/>Swagger · frontend · script"]
-
-    subgraph API["RIR-API (FastAPI)"]
-        direction TB
-
-        subgraph R["app/routers/"]
-            RH["health.py<br/>GET /health"]
-            RA["audio_http.py<br/>wav_response<br/>uploaded_file"]
-            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep<br/>POST /signals/synthetic-ir"]
-            RF["filters.py<br/>POST /filters/single-band"]
-            RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
-            RAC["acoustics.py<br/>POST /acoustics/parameters"]
-        end
-
-        subgraph SC["app/schemas/"]
-            SR["responses.py"]
-            SS["signals.py"]
-            SU["utils.py"]
-        end
-
-        subgraph SV["app/services/"]
-            PN["pink_noise.py<br/>generate_pink_noise"]
-            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
-            IO["audio_io.py<br/>play_and_record"]
-            SIG["signal_utils.py<br/>load_audio<br/>generate_synthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
-            FIL["filter.py<br/>filter_single_band"]
-            AC["acoustic_parameters.py<br/>apply_smoothing<br/>apply_schroeder_integral<br/>linear_regression<br/>calculate_parameters_from_ir<br/>apply_lundeby"]
-        end
-    end
-
-    L["Librerías<br/>FastAPI · Pydantic · NumPy · SciPy · sounddevice"]
-
-    C --> RH
-    C --> RS
-    C --> RF
-    C --> RU
-    C --> RAC
-
-    RS --> SS
-    RU --> SU
-
-    RS --> PN
-    RS --> SW
-    RS --> IO
-    RS --> SIG
-    RF --> FIL
-    RU --> AC
-    RAC --> AC
-
-    PN --> L
-    SW --> L
-    IO --> L
-    SIG --> L
-    FIL --> L
-    AC --> L
-```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
 
