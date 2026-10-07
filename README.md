@@ -105,8 +105,11 @@ flowchart TB
     IO --> L
     RH --> RAH
     SR --> L
-    C --> RM2
+    C -->|"request HTTP + JSON"| RM2
     RM2 --> RF
+    RF -->|"valida con"| SS
+    RF -->|"llama a"| VM2
+
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
