@@ -31,42 +31,38 @@ ISO 3382-1.
 ## Arquitectura del Proyecto
 
 ```mermaid
-graph TD
-    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef m0m1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef futuro fill:#fff8e1,stroke:#f57f17,stroke-width:2px,stroke-dasharray: 5 5;
-
-    Client[Cliente REST / Swagger UI]
-
-    subgraph API [FastAPI App - app/]
-        Health[GET /health]
-        Signals[POST /api/v1/signals]
-
-        PinkNoise[pink_noise.py]
-        SineSweep[sine_sweep.py]
-        AudioIO[audio_io.py]
-
-        M2_Proc["`**[M2] Procesamiento RI**
-        signal_utils.py / filter.py`"]
-        M3_Acous["`**[M3] Parámetros Acústicos**
-        acoustic_parameters.py`"]
+flowchart TB
+    C["Cliente<br/>Swagger · frontend · script"]
+    subgraph API["RIR-API (FastAPI)"]
+        direction TB
+        subgraph R["app/routers/"]
+            RH["health.py<br/>GET /health"]
+            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
+            RM2["M2: /signals/synthetic-ir, filters.py"]
+            RM3["M3: acoustics.py, utils.py"]
+        end
+        subgraph SC["app/schemas/"]
+            SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
+            SM["M2 y M3: ..."]
+        end
+        subgraph SV["app/services/"]
+            PN["pink_noise.py<br/>generate_pink_noise"]
+            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
+            IO["audio_io.py<br/>play_and_record"]
+            VM2["M2: signal_utils.py, filter.py"]
+            VM3["M3: acoustic_parameters.py"]
+        end
     end
-
-    %% Clases aplicadas
-    class Client client;
-    class Health,Signals,PinkNoise,SineSweep,AudioIO m0m1;
-    class M2_Proc,M3_Acous futuro;
-
-    %% Conexiones
-    Client --> Health
-    Client --> Signals
-    Signals --> PinkNoise
-    Signals --> SineSweep
-    Signals --> AudioIO
-
-    %% Flujos futuros a M2 y M3
-    Signals -.-> M2_Proc
-    M2_Proc -.-> M3_Acous
+    L["NumPy · SciPy · sounddevice"]
+    C -->|"request HTTP + JSON"| RS
+    RS -->|"valida con"| SS
+    RS -->|"llama a"| PN
+    RS -->|"llama a"| SW
+    PN --> L
+    SW --> L
+    IO --> L
+    classDef pendiente stroke-dasharray: 5 5
+    class RM2,RM3,SM,VM2,VM3 pendiente
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
