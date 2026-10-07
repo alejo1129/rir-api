@@ -25,10 +25,10 @@ ISO 3382-1.
 ## Integrantes
 
 | Nombre | Legajo | Rol |
-|--------|--------|-----|
 | Fernandez, Alejo | 75508 | ... |
 | Garcia Nizza, Ignacio | 67573 | ... |
 | Prieto, Julian | 57543 | ... |
+| Luque, Mauricio | 38650 | ... |
 
 
 ## Instalación y ejecución
