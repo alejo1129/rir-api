@@ -2,8 +2,7 @@
 
 API REST para procesamiento y analisis de respuestas al impulso segun la norma ISO 3382.
 
-<!-- Badge de CI: reemplazar <usuario>/<repo> por los datos del repositorio del grupo -->
-![CI](https://github.com/alejo1129/rir-api/actions/workflows/ci.yml/badge.svg)](https://github.com/alejo1129/rir-api/actions/workflows/ci.yml)
+![CI](https://github.com/alejo1129/rir-api/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 
 
@@ -16,10 +15,6 @@ ISO 3382-1.
 
 - Consigna, especificaciones y ruta del TP: <https://maxiyommi.github.io/signal-systems/trabajo_practico/ruta/>
 - API de referencia de la catedra (Swagger UI): <https://rir-api.onrender.com/docs>
-
-> Este README es un punto de partida: el grupo lo completa en M0 (integrantes, roles,
-> diagrama de arquitectura, branching strategy) y lo va actualizando hasta M3 (seccion
-> "Validacion" con los resultados).
 
 
 ## Integrantes
