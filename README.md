@@ -78,7 +78,9 @@ flowchart TB
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
             RM2["signals.py<br/>POST /signals/synthetic-ir"]
             RF["filters.py<br/>POST /filters/single-band"]
-            RM3["M3: acoustics.py, utils.py"]
+            RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
+            RA["acoustics.py<br/>POST /acoustics/parameters"]
+            
         end
         subgraph SC["app/schemas/"]
             SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
@@ -106,6 +108,8 @@ flowchart TB
     RH --> RAH
     SR --> L
     C -->|"request HTTP + JSON"| RM2
+    C -->|"request HTTP + JSON"| RU
+    RU --> RA
     RM2 --> RF
     RF -->|"valida con"| SS
     RF -->|"llama a"| VM2
