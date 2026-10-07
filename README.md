@@ -6,6 +6,7 @@ API REST para procesamiento y analisis de respuestas al impulso segun la norma I
 ![CI](https://github.com/<usuario>/<repo>/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 
+
 ## Descripcion
 
 RIR-API es el trabajo practico de Senales y Sistemas (UNTREF, 2C 2026): una API REST
@@ -20,59 +21,109 @@ ISO 3382-1.
 > diagrama de arquitectura, branching strategy) y lo va actualizando hasta M3 (seccion
 > "Validacion" con los resultados).
 
+
 ## Integrantes
 
 | Nombre | Legajo | Rol |
 |--------|--------|-----|
-| ...    | ...    | ... |
+| Fernandez, Alejo | 75508 | ... |
+| Garcia Nizza, Ignacio | 67573 | ... |
+| Prieto, Julian | 57543 | ... |
 
-## Requisitos previos
 
-- Python 3.12 o superior
-- [uv](https://docs.astral.sh/uv/) (gestor de paquetes y entornos virtuales)
-- git y una cuenta de GitHub
+## Instalación y ejecución
 
-## Arranque: crear el repositorio del grupo
-
-Cada grupo trabaja en **un repositorio nuevo propio** y copia adentro el contenido de este
-template (no es un fork).
-
-1. Una persona del grupo crea en GitHub un repositorio **vacio** (por ejemplo `rir-api`,
-   sin README ni .gitignore) y agrega al resto del grupo y a los docentes
-   (**@maxiyommi** y **@jero-scafati**) como colaboradores
-   (*Settings → Collaborators → Add people*).
-2. Copiar el template y hacer el primer commit:
+Para ejecutar el proyecto localmente, primero se debe clonar el repositorio:
 
 ```bash
-# Bajar el repositorio de la materia (solo la ultima version)
-git clone --depth 1 https://github.com/maxiyommi/signal-systems.git
-
-# Clonar el repositorio (vacio) del grupo
-git clone https://github.com/<usuario>/rir-api.git
-
-# Copiar el contenido del template (incluye archivos ocultos: .github/, .gitignore)
-cp -r signal-systems/trabajo_practico/template_repo/. rir-api/
-
+git clone https://github.com/alejo1129/rir-api.git
 cd rir-api
-git add .
-git commit -m "chore: estructura inicial desde el template de la catedra"
-git branch -M main
-git push -u origin main
 ```
 
-3. El resto del grupo clona `rir-api` y listo. La carpeta `signal-systems/` se puede borrar.
-
-## Instalacion y ejecucion
+Luego se instalan las dependencias del proyecto:
 
 ```bash
-# Crear el entorno e instalar dependencias (incluye las de desarrollo: pytest, ruff, ...)
 uv sync
+```
 
-# Iniciar la API con hot-reload
+Para iniciar la API:
+
+```bash
 uv run uvicorn app.main:app --reload
+```
 
-# Correr los tests
-uv run pytest
+Una vez iniciada, la API queda disponible en:
+
+- API: `http://localhost:8000`
+- Swagger UI: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+
+Para ejecutar los tests: 
+
+```bash
+uv run pytest -v
+```
+
+
+## Arquitectura del Proyecto
+
+```mermaid
+flowchart TB
+    C["Cliente<br/>Swagger · frontend · script"]
+    subgraph API["RIR-API (FastAPI)"]
+        direction TB
+        subgraph R["app/routers/"]
+            R3A["acoustic.py<br/>POST /acoustic/parameters"]
+            R3U["utils.py<br/>POST /utils/smothing<br/>POST /utils/shroeder<br/>POST /utils/lundeby"]
+            RH["health.py<br/>GET /health"]
+            RAH["audio_http.py<br/>wav_response<br/>upload_files"]
+            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
+            RM2["signals.py<br/>POST /signals/synthetic-ir"]
+            RF["filters.py<br/>POST /filters/single-band"]
+            RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
+            RA["acoustics.py<br/>POST /acoustics/parameters"]
+            
+        end
+        subgraph SC["app/schemas/"]
+            SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
+            SR["responses.py<br/>HealthResponse"]
+            SM2["signal.py<br/>SyntheticIRRequest"]
+            S3R["responses.py<br/>BandAnalysisResponse"]
+            S3U["utilis.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
+        end
+        subgraph SV["app/services/"]
+            PN["pink_noise.py<br/>generate_pink_noise"]
+            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
+            IO["audio_io.py<br/>play_and_record"]
+            3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
+VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
+            VM2F["filter.py<br/>filter_single_band"]
+            VM3["M3: acoustic_parameters.py"]
+        end
+    end
+    L["NumPy · SciPy · sounddevice · FastAPI · Pydantic"]
+    C -->|"request HTTP + JSON"| RS
+    C -->|"request HTTP + JSON"| RH
+    C -->|"request HTTP + JSON"| R3U
+    RAH -->|"valida con"| SR
+    RS -->|"valida con"| SS
+    RS -->|"llama a"| PN
+    PN --> SW
+    SW --> IO
+    IO --> L
+    RH --> RAH
+    SR --> L
+    C -->|"request HTTP + JSON"| RM2
+    C -->|"request HTTP + JSON"| RU
+    RU --> RA
+    RM2 -->|"valida con"| SM2
+    RM2 -->|"llama a"| VM2
+    VM2 --> VM2F
+    R3U --> R3A
+    S3R --> S3U
+    R3A --> S3R
+    R3A --> 3
+    RM2 --> RF
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
