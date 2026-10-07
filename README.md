@@ -103,7 +103,7 @@ flowchart TB
     SW --> L
     IO --> L
     RH --> RAH
-    RAH --> L
+    SR --> L
     classDef pendiente stroke-dasharray: 5 5
     class RM2,RM3,SM,VM2,VM3 pendiente
 ```
