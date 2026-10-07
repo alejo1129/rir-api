@@ -80,8 +80,6 @@ flowchart TB
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
             RM2["signals.py<br/>POST /signals/synthetic-ir"]
             RF["filters.py<br/>POST /filters/single-band"]
-            RA["acoustics.py<br/>POST /acoustics/parameters"]
-            
         end
         subgraph SC["app/schemas/"]
             SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
