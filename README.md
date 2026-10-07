@@ -111,8 +111,8 @@ flowchart TB
     C -->|"request HTTP + JSON"| RM2
     C -->|"request HTTP + JSON"| RU
     RU --> RA
-    RM2 --> RF
-    RF -->|"valida con"| SM2
+    RF --> RM2
+    RM2 -->|"valida con"| SM2
     RF -->|"llama a"| VM2
     VM2 --> VM2F
 
