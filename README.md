@@ -288,3 +288,4 @@ Para mantener el repositorio ordenado y evitar romper la aplicación principal:
 - Para cada tarea o funcionalidad se crea una rama específica (ej. `feature/m1-senales`, `fix/routing`)[cite: 1].
 - Los cambios se integran a `main` mediante un **Pull Request** previa revisión del equipo[cite: 1].
 - Se utiliza *conventional commits* para los mensajes (ej. `feat:`, `fix:`, `chore:`).
+
