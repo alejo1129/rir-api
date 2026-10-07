@@ -88,6 +88,8 @@ flowchart TB
             SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
             SR["responses.py<br/>HealthResponse"]
             SM2["signal.py<br/>SyntheticIRRequest"]
+            S3R["responses.py<br/>BandAnalysisResponse"]
+            S3U["utilis.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
         end
         subgraph SV["app/services/"]
             PN["pink_noise.py<br/>generate_pink_noise"]
@@ -118,6 +120,8 @@ flowchart TB
     RM2 -->|"llama a"| VM2
     VM2 --> VM2F
     R3U --> R3A
+    S3R --> S3U
+
 
 ```
 
