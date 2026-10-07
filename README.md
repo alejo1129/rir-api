@@ -31,38 +31,67 @@ ISO 3382-1.
 ## Arquitectura del Proyecto
 
 ```mermaid
-flowchart TB
-    C["Cliente<br/>Swagger · frontend · script"]
-    subgraph API["RIR-API (FastAPI)"]
-        direction TB
-        subgraph R["app/routers/"]
-            RH["health.py<br/>GET /health"]
-            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
-            RM2["M2: /signals/synthetic-ir, filters.py"]
-            RM3["M3: acoustics.py, utils.py"]
+graph TD
+    %% Estilos: m0m1 solido, futuro (M2/M3) punteado
+    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef m0m1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef m2fill fill:#fff8e1,stroke:#f57f17,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef m3fill fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+
+    Client[Cliente REST / Swagger UI]
+
+    subgraph API [FastAPI App - app/]
+        %% M0 / M1 (Base)
+        Health[GET /health]
+        Signals[POST /api/v1/signals]
+
+        PinkNoise[pink_noise.py - generate_pink_noise]
+        SineSweep[sine_sweep.py - generate_sine_sweep_pair]
+        AudioIO[audio_io.py - play_and_record]
+
+        %% M2 (Desplegado en caja punteada)
+        subgraph M2_Box [M2: Procesamiento de RI]
+            SyntheticIR[POST /api/v1/signals/synthetic-ir]
+            SingleBand[POST /api/v1/filters/single-band]
+            SignalUtils[signal_utils.py - load_audio / generate_synthetic_ir / get_impulse_response]
+            Filter[filter.py - filter_single_band]
         end
-        subgraph SC["app/schemas/"]
-            SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
-            SM["M2 y M3: ..."]
-        end
-        subgraph SV["app/services/"]
-            PN["pink_noise.py<br/>generate_pink_noise"]
-            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
-            IO["audio_io.py<br/>play_and_record"]
-            VM2["M2: signal_utils.py, filter.py"]
-            VM3["M3: acoustic_parameters.py"]
+
+        %% M3 (Desplegado en caja punteada)
+        subgraph M3_Box [M3: Producto Final]
+            Parameters[POST /api/v1/acoustics/parameters]
+            Schroeder[POST /api/v1/utils/schroeder]
+            Smoothing[POST /api/v1/utils/smoothing]
+            AcousticParams[acoustic_parameters.py - apply_smoothing / apply_schroeder_integral / calculate_parameters_from_ir]
         end
     end
-    L["NumPy · SciPy · sounddevice"]
-    C -->|"request HTTP + JSON"| RS
-    RS -->|"valida con"| SS
-    RS -->|"llama a"| PN
-    RS -->|"llama a"| SW
-    PN --> L
-    SW --> L
-    IO --> L
-    classDef pendiente stroke-dasharray: 5 5
-    class RM2,RM3,SM,VM2,VM3 pendiente
+
+    %% Aplicacion de estilos
+    class Client client;
+    class Health,Signals,PinkNoise,SineSweep,AudioIO m0m1;
+    class SyntheticIR,SingleBand,SignalUtils,Filter m2fill;
+    class Parameters,Schroeder,Smoothing,AcousticParams m3fill;
+
+    %% Conexiones M0/M1
+    Client --> Health
+    Client --> Signals
+    Signals --> PinkNoise
+    Signals --> SineSweep
+    Signals --> AudioIO
+
+    %% Conexiones M2
+    Client --> SyntheticIR
+    Client --> SingleBand
+    SyntheticIR --> SignalUtils
+    SingleBand --> Filter
+
+    %% Conexiones M3
+    Client --> Parameters
+    Client --> Schroeder
+    Client --> Smoothing
+    Parameters --> AcousticParams
+    Schroeder --> AcousticParams
+    Smoothing --> AcousticParams
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
