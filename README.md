@@ -74,6 +74,7 @@ flowchart TB
         direction TB
         subgraph R["app/routers/"]
             RH["health.py<br/>GET /health"]
+            RAH["audio_http.py<br/>wav_response"]
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
             RM2["M2: /signals/synthetic-ir, filters.py"]
             RM3["M3: acoustics.py, utils.py"]
