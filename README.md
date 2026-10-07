@@ -26,8 +26,6 @@ ISO 3382-1.
 |--------|--------|-----|
 | Julian Prieto    | 57543    | ... |
 
-## diagrama de arquitectura
-
 ## Arquitectura del Proyecto
 
 ```mermaid
