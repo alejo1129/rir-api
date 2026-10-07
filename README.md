@@ -92,7 +92,7 @@ flowchart TB
             VM3["M3: acoustic_parameters.py"]
         end
     end
-    L["NumPy · SciPy · sounddevice · FastAPI · Pydantic]
+    L["NumPy · SciPy · sounddevice · FastAPI · Pydantic"]
     C -->|"request HTTP + JSON"| RS
     C -->|"request HTTP + JSON"| RH
     RAH -->|"valida con"| SR
