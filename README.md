@@ -80,7 +80,6 @@ flowchart TB
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
             RM2["signals.py<br/>POST /signals/synthetic-ir"]
             RF["filters.py<br/>POST /filters/single-band"]
-            RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
             RA["acoustics.py<br/>POST /acoustics/parameters"]
             
         end
@@ -114,7 +113,6 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     RH --> RAH
     SR --> L
     C -->|"request HTTP + JSON"| RM2
-    C -->|"request HTTP + JSON"| RU
     RU --> RA
     RF-->|"valida con"| SM2
     RF -->|"llama a"| VM2
