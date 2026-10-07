@@ -124,7 +124,6 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     R3A --> S3R
     R3A --> 3
     RM2 --> RF
-    C --> R3U
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
