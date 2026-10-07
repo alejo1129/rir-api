@@ -28,40 +28,41 @@ ISO 3382-1.
 
 ## diagrama de arquitectura
 
+## Arquitectura del Proyecto
+
 ```mermaid
-flowchart TB
-    C["Cliente<br/>Swagger · frontend · script"]
-    subgraph API["RIR-API (FastAPI)"]
-        direction TB
-        subgraph R["app/routers/"]
-            RH["health.py<br/>GET /health"]
-            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
-            RM2["M2: /signals/synthetic-ir, filters.py"]
-            RM3["M3: acoustics.py, utils.py"]
-        end
-        subgraph SC["app/schemas/"]
-            SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
-            SM["M2 y M3: ..."]
-        end
-        subgraph SV["app/services/"]
-            PN["pink_noise.py<br/>generate_pink_noise"]
-            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
-            IO["audio_io.py<br/>play_and_record"]
-            VM2["M2: signal_utils.py, filter.py"]
-            VM3["M3: acoustic_parameters.py"]
-        end
+graph TD
+    %% Estilos de nodos
+    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef m0m1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef futuro fill:#fff8e1,stroke:#f57f17,stroke-width:2px,stroke-dasharray: 5 5;
+
+    Client[<b>Cliente REST / Swagger UI</b><br/>http://localhost:8000/docs] :::client
+
+    subgraph API [FastAPI App - app/]
+        %% M0 y M1 (Implementados / Actuales)
+        Health[<b>/health</b><br/>app/routers/health.py] :::m0m1
+        Signals[<b>/api/v1/signals</b><br/>app/routers/signals.py] :::m0m1
+
+        PinkNoise[<b>pink_noise.py</b><br/>generate_pink_noise] :::m0m1
+        SineSweep[<b>sine_sweep.py</b><br/>generate_sine_sweep_pair] :::m0m1
+        AudioIO[<b>audio_io.py</b><br/>play_and_record] :::m0m1
+
+        %% M2 y M3 (Cajas Punteadas - Futuro)
+        M2_Proc[<b>[M2] Procesamiento de RI</b><br/>signal_utils.py / filter.py] :::futuro
+        M3_Acous[<b>[M3] Parámetros Acústicos</b><br/>acoustic_parameters.py] :::futuro
     end
-    L["NumPy · SciPy · sounddevice"]
-    C -->|"request HTTP + JSON"| RS
-    RS -->|"valida con"| SS
-    RS -->|"llama a"| PN
-    RS -->|"llama a"| SW
-    PN --> L
-    SW --> L
-    IO --> L
-    classDef pendiente stroke-dasharray: 5 5
-    class RM2,RM3,SM,VM2,VM3 pendiente
-```
+
+    %% Relaciones
+    Client --> Health
+    Client --> Signals
+    Signals --> PinkNoise
+    Signals --> SineSweep
+    Signals --> AudioIO
+
+    %% Flujos futuros hacia M2 y M3
+    Signals -.-> M2_Proc
+    M2_Proc -.-> M3_Acous
 ## Requisitos previos
 
 - Python 3.12 o superior
