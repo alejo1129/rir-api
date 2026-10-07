@@ -91,7 +91,8 @@ flowchart TB
             PN["pink_noise.py<br/>generate_pink_noise"]
             SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
             IO["audio_io.py<br/>play_and_record"]
-            VM2["M2: signal_utils.py, filter.py"]
+            VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
+            VM2F["filter.py<br/>filter_single_band"]
             VM3["M3: acoustic_parameters.py"]
         end
     end
@@ -113,6 +114,7 @@ flowchart TB
     RM2 --> RF
     RF -->|"valida con"| SM2
     RF -->|"llama a"| VM2
+    VM2 --> VM2F
 
 ```
 
