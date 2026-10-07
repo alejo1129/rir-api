@@ -32,70 +32,41 @@ ISO 3382-1.
 
 ```mermaid
 graph TD
-    %% Estilos de nodos
     classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
     classDef m0m1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef futuro fill:#fff8e1,stroke:#f57f17,stroke-width:2px,stroke-dasharray: 5 5;
 
-    Client[<b>Cliente REST / Swagger UI</b><br/>http://localhost:8000/docs] :::client
+    Client[Cliente REST / Swagger UI]
 
     subgraph API [FastAPI App - app/]
-        %% M0 y M1 (Implementados / Actuales)
-        Health[<b>/health</b><br/>app/routers/health.py] :::m0m1
-        Signals[<b>/api/v1/signals</b><br/>app/routers/signals.py] :::m0m1
+        Health[GET /health]
+        Signals[POST /api/v1/signals]
 
-        PinkNoise[<b>pink_noise.py</b><br/>generate_pink_noise] :::m0m1
-        SineSweep[<b>sine_sweep.py</b><br/>generate_sine_sweep_pair] :::m0m1
-        AudioIO[<b>audio_io.py</b><br/>play_and_record] :::m0m1
+        PinkNoise[pink_noise.py]
+        SineSweep[sine_sweep.py]
+        AudioIO[audio_io.py]
 
-        %% M2 y M3 (Cajas Punteadas - Futuro)
-        M2_Proc[<b>[M2] Procesamiento de RI</b><br/>signal_utils.py / filter.py] :::futuro
-        M3_Acous[<b>[M3] Parámetros Acústicos</b><br/>acoustic_parameters.py] :::futuro
+        M2_Proc["`**[M2] Procesamiento RI**
+        signal_utils.py / filter.py`"]
+        M3_Acous["`**[M3] Parámetros Acústicos**
+        acoustic_parameters.py`"]
     end
 
-    %% Relaciones
+    %% Clases aplicadas
+    class Client client;
+    class Health,Signals,PinkNoise,SineSweep,AudioIO m0m1;
+    class M2_Proc,M3_Acous futuro;
+
+    %% Conexiones
     Client --> Health
     Client --> Signals
     Signals --> PinkNoise
     Signals --> SineSweep
     Signals --> AudioIO
 
-    %% Flujos futuros hacia M2 y M3
+    %% Flujos futuros a M2 y M3
     Signals -.-> M2_Proc
     M2_Proc -.-> M3_Acous
-## Requisitos previos
-
-- Python 3.12 o superior
-- [uv](https://docs.astral.sh/uv/) (gestor de paquetes y entornos virtuales)
-- git y una cuenta de GitHub
-
-## Arranque: crear el repositorio del grupo
-
-Cada grupo trabaja en **un repositorio nuevo propio** y copia adentro el contenido de este
-template (no es un fork).
-
-1. Una persona del grupo crea en GitHub un repositorio **vacio** (por ejemplo `rir-api`,
-   sin README ni .gitignore) y agrega al resto del grupo y a los docentes
-   (**@maxiyommi** y **@jero-scafati**) como colaboradores
-   (*Settings → Collaborators → Add people*).
-2. Copiar el template y hacer el primer commit:
-
-```bash
-# Bajar el repositorio de la materia (solo la ultima version)
-git clone --depth 1 https://github.com/maxiyommi/signal-systems.git
-
-# Clonar el repositorio (vacio) del grupo
-git clone https://github.com/<usuario>/rir-api.git
-
-# Copiar el contenido del template (incluye archivos ocultos: .github/, .gitignore)
-cp -r signal-systems/trabajo_practico/template_repo/. rir-api/
-
-cd rir-api
-git add .
-git commit -m "chore: estructura inicial desde el template de la catedra"
-git branch -M main
-git push -u origin main
-```
 
 3. El resto del grupo clona `rir-api` y listo. La carpeta `signal-systems/` se puede borrar.
 
