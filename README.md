@@ -116,8 +116,8 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     C -->|"request HTTP + JSON"| RM2
     C -->|"request HTTP + JSON"| RU
     RU --> RA
-    RM2 -->|"valida con"| SM2
-    RM2 -->|"llama a"| VM2
+    RF-->|"valida con"| SM2
+    RF -->|"llama a"| VM2
     VM2 --> VM2F
     R3U --> R3A
     S3R --> S3U
