@@ -81,6 +81,7 @@ flowchart TB
         end
         subgraph SC["app/schemas/"]
             SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
+            SR["responses.py<br/>HealthResponse"]
             SM["M2 y M3: ..."]
         end
         subgraph SV["app/services/"]
@@ -94,6 +95,7 @@ flowchart TB
     L["NumPy · SciPy · sounddevice"]
     C -->|"request HTTP + JSON"| RS
     C -->|"request HTTP + JSON"| RH
+    RAH -->|"valida con"| SR
     RS -->|"valida con"| SS
     RS -->|"llama a"| PN
     RS -->|"llama a"| SW
