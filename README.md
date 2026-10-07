@@ -173,6 +173,17 @@ Cada milestone expone lo que construye: los routers y schemas de `signals` se ag
 (y suman `synthetic-ir` en M2), los de `filters` en M2 y los de `acoustics` y `utils` en M3
 (ver los `TODO` en `app/main.py`).
 
+
+## Estrategia de trabajo con Git:
+
+Para poder organizar mejor la metodología de trabajo en grupo, lo haremos de la siguiente manera:
+- `main` será la rama principal.
+- Para cada tarea crearemos una rama aparte.
+- Cada rama tendra un nombre relacionado con la tarea.
+- Cuando terminemos un cambio, lo pasaremos a `main` mediante un Pull Request.
+- Los commits tendran mensajes cortos que indiquen que se modificó.
+
+
 ## Milestones y entregas (2C 2026)
 
 | Milestone | Entrega | Tag | Evaluacion |
