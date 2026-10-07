@@ -110,8 +110,6 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     RS -->|"llama a"| PN
     PN --> SW
     SW --> IO
-    PN --> L
-    SW --> L
     IO --> L
     RH --> RAH
     SR --> L
