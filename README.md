@@ -113,7 +113,7 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     IO --> L
     RH --> RAH
     SR --> L
-    C -->|"request HTTP + JSON"| RF
+    C -->|"request HTTP + JSON"| RM2
     C -->|"request HTTP + JSON"| RU
     RU --> RA
     RF --> RM2
