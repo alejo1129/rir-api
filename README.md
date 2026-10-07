@@ -104,6 +104,7 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     L["NumPy · SciPy · sounddevice · FastAPI · Pydantic"]
     C -->|"request HTTP + JSON"| RS
     C -->|"request HTTP + JSON"| RH
+    C -->|"request HTTP + JSON"| R3U
     RAH -->|"valida con"| SR
     RS -->|"valida con"| SS
     RS -->|"llama a"| PN
