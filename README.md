@@ -67,20 +67,6 @@ graph TD
     %% Flujos futuros a M2 y M3
     Signals -.-> M2_Proc
     M2_Proc -.-> M3_Acous
-
-3. El resto del grupo clona `rir-api` y listo. La carpeta `signal-systems/` se puede borrar.
-
-## Instalacion y ejecucion
-
-```bash
-# Crear el entorno e instalar dependencias (incluye las de desarrollo: pytest, ruff, ...)
-uv sync
-
-# Iniciar la API con hot-reload
-uv run uvicorn app.main:app --reload
-
-# Correr los tests
-uv run pytest
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
