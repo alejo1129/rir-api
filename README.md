@@ -26,7 +26,7 @@ ISO 3382-1.
 
 | Nombre | Legajo | Rol |
 |--------|--------|-----|
-| Fernandez, Alejo | ... | ... |
+| Fernandez, Alejo | 75508 | ... |
 | Garcia Nizza, Ignacio | 67573 | ... |
 | Prieto, Julian | 57543 | ... |
 
