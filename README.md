@@ -161,6 +161,7 @@ flowchart TB
     SIG --> L
     FIL --> L
     AC --> L
+```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
 
