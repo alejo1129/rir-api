@@ -93,6 +93,7 @@ flowchart TB
     end
     L["NumPy · SciPy · sounddevice"]
     C -->|"request HTTP + JSON"| RS
+    C -->|"request HTTP + JSON"| RH
     RS -->|"valida con"| SS
     RS -->|"llama a"| PN
     RS -->|"llama a"| SW
