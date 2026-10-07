@@ -96,7 +96,6 @@ flowchart TB
             3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
 VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
             VM2F["filter.py<br/>filter_single_band"]
-            VM3["M3: acoustic_parameters.py"]
         end
     end
     L["NumPy · SciPy · sounddevice · FastAPI · Pydantic"]
