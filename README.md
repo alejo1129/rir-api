@@ -24,7 +24,9 @@ ISO 3382-1.
 
 | Nombre | Legajo | Rol |
 |--------|--------|-----|
-| Julian Prieto    | 57543    | ... |
+| Fernandez, Alejo | ... | ... |
+| Garcia Nizza, Ignacio | 67573 | ... |
+| Prieto, Julian | 57543 | ... |
 
 ## Arquitectura del Proyecto
 
