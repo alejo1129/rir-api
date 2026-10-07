@@ -73,7 +73,7 @@ flowchart TB
     subgraph API["RIR-API (FastAPI)"]
         direction TB
         subgraph R["app/routers/"]
-            R3A["audio_http.py<br/>uploaded_file"]
+            R3A["acoustic.py<br/>POST /acoustic/parameters"]
             R3U["utils.p<br/>POST /utils/smothing<br/>POST /utils/shroeder<br/>POST /utils/lundeby"]
             RH["health.py<br/>GET /health"]
             RAH["audio_http.py<br/>wav_response<br/>upload_files"]
