@@ -21,10 +21,10 @@ ISO 3382-1.
 
 | Nombre | Legajo | Rol |
 | --- | --- | --- |
-| Fernandez, Alejo | 75508 | DSP / Signal Processing Lead |
-| Garcia Nizza, Ignacio | 67573 | QA & Testing Lead |
-| Prieto, Julian | 57543 | Backend & API Lead |
-| Luque, Mauricio | 38650 | DevOps & Documentation Lead |
+| Fernandez, Alejo | 75508 | Responsable de DSP / Procesamiento de Señales |
+| Garcia Nizza, Ignacio | 67573 | Responsable de QA & Testing |
+| Prieto, Julian | 57543 | Responsable de Backend & API |
+| Luque, Mauricio | 38650 | Responsable de DevOps & Documentación |
 
 
 ## Instalación y ejecución
