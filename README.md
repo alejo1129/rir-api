@@ -112,12 +112,15 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     VM2 --> VM2F
     R3U --> R3A
     S3R --> S3U
-    R3A --> S3R
-    R3A --> M3
+    R3A -->|"valida con"| S3R
+    R3A -->|"llama a"| M3
     RM2 --> RF
     S3U --> L
     M3 --> L
     RF --> L
+    SM2 --> L
+    SS --> L
+    
 end
 ```
 
