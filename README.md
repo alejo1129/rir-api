@@ -21,10 +21,10 @@ ISO 3382-1.
 
 | Nombre | Legajo | Rol |
 | --- | --- | --- |
-| Fernandez, Alejo | 75508 | ... |
-| Garcia Nizza, Ignacio | 67573 | ... |
-| Prieto, Julian | 57543 | ... |
-| Luque, Mauricio | 38650 | ... |
+| Fernandez, Alejo | 75508 | DSP / Signal Processing Lead |
+| Garcia Nizza, Ignacio | 67573 | QA & Testing Lead |
+| Prieto, Julian | 57543 | Backend & API Lead |
+| Luque, Mauricio | 38650 | DevOps & Documentation Lead |
 
 
 ## Instalación y ejecución
@@ -74,9 +74,8 @@ flowchart TB
             RH["health.py<br/>GET /health"]
             RAH["audio_http.py<br/>wav_response<br/>upload_files"]
             RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
-            subgraph R["M2"]
-                RM2["signals.py<br/>POST /signals/synthetic-ir"]
-                RF["filters.py<br/>POST /filters/single-band"]
+            RM2["signals.py<br/>POST /signals/synthetic-ir"]
+            RF["filters.py<br/>POST /filters/single-band"]
         end
         subgraph SC["app/schemas/"]
             SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
@@ -117,11 +116,8 @@ VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_res
     RM2 --> RF
     S3U --> L
     M3 --> L
-    RF --> L
     SM2 --> L
     SS --> L
-    
-end
 ```
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
