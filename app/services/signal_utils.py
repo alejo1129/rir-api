@@ -102,4 +102,19 @@ def logarithmic_scale_conversion(signal: np.ndarray) -> np.ndarray:
     np.ndarray
         Senal en dB, normalizada a 0 dB en el maximo.
     """
-    raise NotImplementedError("Implementar en Milestone 2")
+    
+    amplitud = np.abs(np.asarray(signal, dtype=np.float64))
+
+    if amplitud.size == 0:
+        return np.array([], dtype=np.float64)
+
+    maximo = np.max(amplitud)
+
+    if maximo == 0:
+        return np.full_like(amplitud, -120.0)
+
+    amplitud_normalizada = amplitud / maximo
+    amplitud_segura = np.maximum(amplitud_normalizada, 1e-6)
+
+    return 20 * np.log10(amplitud_segura)
+
