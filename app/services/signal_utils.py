@@ -36,7 +36,15 @@ def load_audio(path: str | Path) -> tuple[np.ndarray, int]:
         Si el archivo no es un audio valido o el formato no es soportado
         (con un mensaje claro que indique el archivo y el motivo).
     """
-    raise NotImplementedError("Implementar en Milestone 2")
+    """raise NotImplementedError("Implementar en Milestone 2")"""
+    import soundfile as sf
+
+    audio, fs = sf.read(path, dtype="float64", always_2d=False)
+
+    if audio.ndim > 1:
+        audio = np.mean(audio, axis=1)
+
+    return audio, fs
 
 
 def generate_synthetic_ir(duration: float, t60_values: dict[float, float], fs: int) -> np.ndarray:
@@ -102,7 +110,6 @@ def logarithmic_scale_conversion(signal: np.ndarray) -> np.ndarray:
     np.ndarray
         Senal en dB, normalizada a 0 dB en el maximo.
     """
-    
     amplitud = np.abs(np.asarray(signal, dtype=np.float64))
 
     if amplitud.size == 0:
@@ -117,4 +124,3 @@ def logarithmic_scale_conversion(signal: np.ndarray) -> np.ndarray:
     amplitud_segura = np.maximum(amplitud_normalizada, 1e-6)
 
     return 20 * np.log10(amplitud_segura)
-
