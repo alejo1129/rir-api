@@ -1,4 +1,3 @@
-
 """
 RIR-API - Milestone 1: Generación de señales.
 
@@ -20,8 +19,8 @@ response and distortion with a swept-sine technique.
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.services.sine_sweep import generate_sine_sweep_pair
 from app.routers.audio_http import wav_response
+from app.services.sine_sweep import generate_sine_sweep_pair
 
 router = APIRouter()
 
@@ -50,5 +49,3 @@ def create_sine_sweep(params: SineSweepRequest):
         fs=params.fs,
         filename="sine_sweep.wav",
     )
-
-

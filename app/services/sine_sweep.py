@@ -48,18 +48,18 @@ def generate_sine_sweep_pair(
     n = int(duration * fs)
     t = np.arange(n, dtype=np.float64) / fs
 
-    L = duration / np.log(f2 / f1)
+    log_factor = duration / np.log(f2 / f1)
 
-    fase = 2 * np.pi * f1 * L * (np.exp(t / L) - 1)
+    fase = 2 * np.pi * f1 * log_factor * (np.exp(t / log_factor) - 1)
     sweep = np.sin(fase)
 
     # Filtro inverso según la técnica de Farina
-    inverse_filter = sweep[::-1] * np.exp(-t / L)
+    inverse_filter = sweep[::-1] * np.exp(-t / log_factor)
 
     # Normalizar el Barrido
     sweep /= np.max(np.abs(sweep))
 
-    # Normalizar el filtro para que la convolucion 
+    # Normalizar el filtro para que la convolucion
     # Produzca un impulso de amplitud aproximadamente 1
     from scipy.signal import fftconvolve
 
@@ -68,6 +68,5 @@ def generate_sine_sweep_pair(
 
     if pico > 0:
         inverse_filter /= pico
-    
-    return sweep, inverse_filter
 
+    return sweep, inverse_filter

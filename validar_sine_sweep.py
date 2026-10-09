@@ -18,33 +18,27 @@ Referencia:
     response and distortion with a swept-sine technique.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.signal import fftconvolve
 
 from app.services.sine_sweep import generate_sine_sweep_pair
-
 
 # ---------------------------------------------------------
 # 1. Configuración de los parámetros de generación
 # ---------------------------------------------------------
 
-fs = 44100          # Frecuencia de muestreo [Hz]
-duracion = 2.0      # Duración del barrido [s]
-f1 = 20             # Frecuencia inicial [Hz]
-f2 = 20000          # Frecuencia final [Hz]
+fs = 44100  # Frecuencia de muestreo [Hz]
+duracion = 2.0  # Duración del barrido [s]
+f1 = 20  # Frecuencia inicial [Hz]
+f2 = 20000  # Frecuencia final [Hz]
 
 
 # ---------------------------------------------------------
 # 2. Generación del barrido y su filtro inverso
 # ---------------------------------------------------------
 
-sweep, inverso = generate_sine_sweep_pair(
-    duration=duracion,
-    f1=f1,
-    f2=f2,
-    fs=fs
-)
+sweep, inverso = generate_sine_sweep_pair(duration=duracion, f1=f1, f2=f2, fs=fs)
 
 
 # ---------------------------------------------------------
@@ -103,4 +97,3 @@ plt.savefig("validacion_sine_sweep.png", dpi=150)
 
 # Mostrar los resultados
 plt.show()
-
