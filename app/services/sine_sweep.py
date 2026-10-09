@@ -39,4 +39,34 @@ def generate_sine_sweep_pair(
     .. [1] Farina, A. (2000). "Simultaneous measurement of impulse response
        and distortion with a swept-sine technique." 108th AES Convention.
     """
-    raise NotImplementedError("Implementar en Milestone 1")
+    if duration <= 0 or f1 <= 0 or f2 <= f1 or fs <= 0:
+        raise ValueError("Parámetros del sweep inválidos")
+
+    if f2 >= fs / 2:
+        raise ValueError("f2 debe ser menor que la frecuencia de Nyquist")
+
+    n = int(duration * fs)
+    t = np.arange(n, dtype=np.float64) / fs
+
+    log_factor = duration / np.log(f2 / f1)
+
+    fase = 2 * np.pi * f1 * log_factor * (np.exp(t / log_factor) - 1)
+    sweep = np.sin(fase)
+
+    # Filtro inverso según la técnica de Farina
+    inverse_filter = sweep[::-1] * np.exp(-t / log_factor)
+
+    # Normalizar el Barrido
+    sweep /= np.max(np.abs(sweep))
+
+    # Normalizar el filtro para que la convolucion
+    # Produzca un impulso de amplitud aproximadamente 1
+    from scipy.signal import fftconvolve
+
+    respuesta = fftconvolve(sweep, inverse_filter, mode="full")
+    pico = np.max(np.abs(respuesta))
+
+    if pico > 0:
+        inverse_filter /= pico
+
+    return sweep, inverse_filter

@@ -83,7 +83,20 @@ def get_impulse_response(recording: np.ndarray, inverse_filter: np.ndarray) -> n
     np.ndarray
         Respuesta al impulso estimada, normalizada.
     """
-    raise NotImplementedError("Implementar en Milestone 2")
+    from scipy.signal import fftconvolve
+
+    recording = np.asarray(recording, dtype=np.float64)
+    inverse_filter = np.asarray(inverse_filter, dtype=np.float64)
+
+    ir = fftconvolve(recording, inverse_filter, mode="full")
+
+    peak_index = np.argmax(np.abs(ir))
+    ir = ir[peak_index:]
+
+    peak = np.max(np.abs(ir))
+    if peak > 0:
+        ir = ir / peak
+    return ir
 
 
 def logarithmic_scale_conversion(signal: np.ndarray) -> np.ndarray:
