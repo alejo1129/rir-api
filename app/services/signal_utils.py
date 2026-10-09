@@ -38,14 +38,20 @@ def load_audio(path: str | Path) -> tuple[np.ndarray, int]:
     """
     """raise NotImplementedError("Implementar en Milestone 2")"""
     import soundfile as sf
+    from pathlib import Path
 
-    audio, fs = sf.read(path, dtype="float64", always_2d=False)
+    try: 
+        audio, fs = sf.read(path, dtype="float64", always_2d=False)
+    except sf.LibsndfileError as error:
+        if not Path(path).is_file():
+            raise FileNotFoundError(f"Archivo no encontrado: {path}") from error
+        else:
+            raise ValueError(f"Archivo no es un audio valido: {path}. Error: {error}") from error
 
     if audio.ndim > 1:
         audio = np.mean(audio, axis=1)
 
     return audio, fs
-
 
 def generate_synthetic_ir(duration: float, t60_values: dict[float, float], fs: int) -> np.ndarray:
     """Sintetiza una respuesta al impulso con valores de T60 conocidos por banda.
