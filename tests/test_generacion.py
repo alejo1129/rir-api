@@ -16,14 +16,11 @@ from app.services.audio_io import play_and_record
 from app.services.pink_noise import generate_pink_noise
 from app.services.sine_sweep import generate_sine_sweep_pair
 
-pytestmark = pytest.mark.xfail(
-    raises=NotImplementedError, strict=False, reason="se implementa en M1"
-)
-
-
 # --------------------------------------------------------------------------- #
 # Ruido rosa
 # --------------------------------------------------------------------------- #
+
+
 class TestGeneratePinkNoise:
     """Tests para la funcion generate_pink_noise."""
 
@@ -58,6 +55,8 @@ class TestGeneratePinkNoise:
 # --------------------------------------------------------------------------- #
 # Sine sweep
 # --------------------------------------------------------------------------- #
+
+
 class TestGenerateSineSweepPair:
     """Tests para la funcion generate_sine_sweep_pair."""
 
