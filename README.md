@@ -63,62 +63,41 @@ uv run pytest -v
 
 ## Arquitectura del Proyecto
 
+
 ```mermaid
-flowchart TB
-    C["Cliente<br/>Swagger · frontend · script"]
-    subgraph API["RIR-API (FastAPI)"]
-        direction TB
-        subgraph R["app/routers/"]
-            R3A["acoustic.py<br/>POST /acoustic/parameters"]
-            R3U["utils.py<br/>POST /utils/smothing<br/>POST /utils/shroeder<br/>POST /utils/lundeby"]
-            RH["health.py<br/>GET /health"]
-            RAH["audio_http.py<br/>wav_response<br/>upload_files"]
-            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
-            RM2["signals.py<br/>POST /signals/synthetic-ir"]
-            RF["filters.py<br/>POST /filters/single-band"]
-        end
-        subgraph SC["app/schemas/"]
-            SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
-            SR["responses.py<br/>HealthResponse"]
-            SM2["signal.py<br/>SyntheticIRRequest"]
-            S3R["responses.py<br/>BandAnalysisResponse"]
-            S3U["utilis.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
-        end
-        subgraph SV["app/services/"]
-            PN["pink_noise.py<br/>generate_pink_noise"]
-            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
-            IO["audio_io.py<br/>play_and_record"]
-            M3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
-VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
-            VM2F["filter.py<br/>filter_single_band"]
-        end
-    end
-    L["NumPy · SciPy · sounddevice · FastAPI · Pydantic"]
-    C -->|"request HTTP + JSON"| RS
-    C -->|"request HTTP + JSON"| RH
-    C -->|"request HTTP + JSON"| R3U
-    RAH -->|"valida con"| SR
-    RS -->|"valida con"| SS
-    RS -->|"llama a"| PN
-    PN --> SW
-    SW --> IO
-    IO --> L
-    RH --> RAH
-    SR --> L
-    C -->|"request HTTP + JSON"| RM2
-    RF-->|"valida con"| SM2
-    RF -->|"llama a"| VM2
-    VM2 --> VM2F
-    R3U --> R3A
-    S3R --> S3U
-    R3A -->|"valida con"| S3R
-    R3A -->|"llama a"| M3
-    RM2 --> RF
-    S3U --> L
-    M3 --> L
-    SM2 --> L
-    SS --> L
+flowchart LR
+    C[Cliente / Swagger] --> API[FastAPI]
+    API --> RH[Health - M0]
+    API -.-> RS[Signals - M1 y M2]
+    API -.-> RF[Filters - M2]
+    API -.-> RU[Utils - M3]
+    API -.-> RA[Acoustics - M3]
+    RS --> S[Schemas Pydantic]
+    RF --> S
+    RU --> S
+    RA --> S
+    RS --> SV[Servicios de procesamiento]
+    RF --> SV
+    RU --> SV
+    RA --> SV
+    SV --> LIB[NumPy / SciPy / sounddevice]
 ```
+
+**Estado:** las flechas continuas representan conexiones implementadas o componentes del diseño; las flechas punteadas desde FastAPI indican routers previstos que todavía no están registrados en `app/main.py`.
+
+### Flujo de procesamiento de audio (M1 a M3)
+
+```mermaid
+flowchart LR
+    A["M1: Generación de señales"] --> B["M1: Reproducción y grabación"]
+    B --> C["M2: Respuesta al impulso"]
+    C --> D["M2: Filtrado por bandas"]
+    D --> E["M3: Curva de decaimiento"]
+    E --> F["M3: Parámetros acústicos"]
+    F --> G["Resultados ISO 3382"]
+```
+
+
 
 La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
 
