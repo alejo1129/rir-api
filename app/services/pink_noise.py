@@ -45,4 +45,6 @@ def generate_pink_noise(duration: float, fs: int) -> np.ndarray:
        1/f noise. JASA 63(1), 258-263.
     .. [2] https://www.firstpr.com.au/dsp/pink-noise/
     """
-    raise NotImplementedError("Implementar en Milestone 1")
+    n = int(duration * fs)
+    white = np.random.default_rng().standard_normal(n)
+    return white
