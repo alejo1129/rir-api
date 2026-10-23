@@ -66,67 +66,72 @@ uv run pytest -v
 ```mermaid
 flowchart TB
     C["Cliente<br/>Swagger · frontend · script"]
-    subgraph API["RIR-API (FastAPI)"]
-        direction TB
-        subgraph R["app/routers/"]
-            R3A["acoustic.py<br/>POST /acoustic/parameters"]
-            R3U["utils.py<br/>POST /utils/smothing<br/>POST /utils/shroeder<br/>POST /utils/lundeby"]
-            RH["health.py<br/>GET /health"]
-            RAH["audio_http.py<br/>wav_response<br/>upload_files"]
-            RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep"]
-            RM2["signals.py<br/>POST /signals/synthetic-ir"]
-            RF["filters.py<br/>POST /filters/single-band"]
-        end
-        subgraph SC["app/schemas/"]
-            SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest"]
-            SR["responses.py<br/>HealthResponse"]
-            SM2["signal.py<br/>SyntheticIRRequest"]
-            S3R["responses.py<br/>BandAnalysisResponse"]
-            S3U["utilis.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
-        end
-        subgraph SV["app/services/"]
-            PN["pink_noise.py<br/>generate_pink_noise"]
-            SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
-            IO["audio_io.py<br/>play_and_record"]
-            M3["acoustic_parameters.py<br/>appl_smoothing<br/>apply_schroeder_integral<br/>linear_regrssion<br/7>calculate_parameters_from_ir<br/>apply_lundeby"]
-VM2["signal_utils.py<br/>load_audio<br/>generate_snthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
-            VM2F["filter.py<br/>filter_single_band"]
-        end
+
+    subgraph R["app/routers/ · FastAPI"]
+        RH["health.py<br/>GET /health"]
+        RAH["audio_http.py<br/>wav_response<br/>uploaded_file"]
+        RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep<br/>POST /signals/synthetic-ir"]
+        RF["filters.py<br/>POST /filters/single-band"]
+        RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
+        RA["acoustics.py<br/>POST /acoustics/parameters"]
     end
-    L["NumPy · SciPy · sounddevice · FastAPI · Pydantic"]
-    C -->|"request HTTP + JSON"| RS
-    C -->|"request HTTP + JSON"| RH
-    C -->|"request HTTP + JSON"| R3U
-    RAH -->|"valida con"| SR
-    RS -->|"valida con"| SS
-    RS -->|"llama a"| PN
-    PN --> SW
-    SW --> IO
-    IO --> L
-    RH --> RAH
-    SR --> L
-    C -->|"request HTTP + JSON"| RM2
-    RF-->|"valida con"| SM2
-    RF -->|"llama a"| VM2
-    VM2 --> VM2F
-    R3U --> R3A
-    S3R --> S3U
-    R3A -->|"valida con"| S3R
-    R3A -->|"llama a"| M3
-    RM2 --> RF
-    S3U --> L
-    M3 --> L
-    SM2 --> L
-    SS --> L
+
+    subgraph SC["app/schemas/ · Pydantic"]
+        SR["responses.py<br/>HealthResponse<br/>BandAnalysisResponse"]
+        SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest<br/>SyntheticIRRequest"]
+        SU["utils.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
+    end
+
+    subgraph SV["app/services/"]
+        PN["pink_noise.py<br/>generate_pink_noise"]
+        SW["sine_sweep.py<br/>generate_sine_sweep_pair"]
+        IO["audio_io.py<br/>play_and_record"]
+        SIG["signal_utils.py<br/>load_audio<br/>generate_synthetic_ir<br/>get_impulse_response<br/>logarithmic_scale_conversion"]
+        FIL["filter.py<br/>filter_single_band"]
+        AC["acoustic_parameters.py<br/>apply_smoothing<br/>apply_schroeder_integral<br/>linear_regression<br/>calculate_parameters_from_ir<br/>apply_lundeby"]
+    end
+
+    L["Librerías de procesamiento<br/>NumPy · SciPy · sounddevice · soundfile"]
+
+C -->|"GET /health"| RH
+RH -->|"response_model"| SR
+RH -->|"JSON"| C
+
+C -->|"datos JSON"| RS
+RS -->|"valida request"| SS
+RS --> PN
+RS --> SW
+RS --> SIG
+RS -->|"wav_response"| RAH
+RS -->|"WAV"| C
+
+C -->|"WAV + parámetros"| RF
+RF -->|"uploaded_file / wav_response"| RAH
+RF -->|"load_audio"| SIG
+RF --> FIL
+RF -->|"WAV"| C
+
+C -->|"datos JSON"| RU
+RU -->|"valida request"| SU
+RU --> AC
+RU -->|"JSON"| C
+
+C -->|"RI en WAV"| RA
+RA -->|"uploaded_file"| RAH
+RA -->|"load_audio"| SIG
+RA --> FIL
+RA --> AC
+RA -->|"response_model"| SR
+RA -->|"JSON: EDT, T20, T30, D50, C80"| C
+
+PN --> L
+SW --> L
+IO --> L
+SIG --> L
+FIL --> L
+AC --> L
 ```
 
-La API queda disponible en `http://localhost:8000`. Documentacion interactiva:
-
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-`uv sync` genera un `uv.lock` con las versiones exactas instaladas: **commitéenlo** en el
-repositorio del grupo para que todos (y el CI) usen las mismas versiones.
 
 ## Estructura del proyecto
 
@@ -134,37 +139,44 @@ repositorio del grupo para que todos (y el CI) usen las mismas versiones.
 rir-api/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                    # Punto de entrada FastAPI (/ y /health)
-│   ├── settings.py                # Configuracion (pydantic-settings, variables RIR_*)
+│   ├── main.py
+│   ├── settings.py
 │   ├── routers/
 │   │   ├── __init__.py
-│   │   ├── health.py              # GET /health (M0)
-│   │   └── audio_http.py          # wav_response y uploaded_file (ya resueltas)
+│   │   ├── health.py
+│   │   ├── audio_http.py
+│   │   ├── signals.py
+│   │   ├── filters.py
+│   │   ├── acoustics.py
+│   │   └── utils.py
 │   ├── schemas/
-│   │   └── __init__.py            # Modelos Pydantic de request/response (desde M1)
+│   │   ├── __init__.py
+│   │   ├── signals.py
+│   │   ├── utils.py
+│   │   └── responses.py
 │   └── services/
 │       ├── __init__.py
-│       ├── pink_noise.py          # generate_pink_noise (M1)
-│       ├── sine_sweep.py          # generate_sine_sweep_pair (M1)
-│       ├── audio_io.py            # play_and_record (M1)
-│       ├── signal_utils.py        # load_audio, generate_synthetic_ir, get_impulse_response,
-│       │                          # logarithmic_scale_conversion (M2)
-│       ├── filter.py              # filter_single_band (M2)
-│       └── acoustic_parameters.py # apply_smoothing, apply_schroeder_integral, linear_regression,
-│                                  # calculate_parameters_from_ir, apply_lundeby (M3)
+│       ├── pink_noise.py
+│       ├── sine_sweep.py
+│       ├── audio_io.py
+│       ├── signal_utils.py
+│       ├── filter.py
+│       └── acoustic_parameters.py
 ├── tests/
-│   ├── data/                      # WAV chicos de prueba (se versionan)
-│   ├── test_placeholder.py        # Test trivial (M0)
-│   ├── test_generacion.py         # Tests de M1
-│   ├── test_procesamiento.py      # Tests de M2
-│   ├── test_analisis.py           # Tests de M3 (services)
-│   └── test_api.py                # Tests de endpoints, por milestone (M0 a M3)
-├── data/                          # Mediciones y audios locales (ignorado por git)
+│   ├── data/
+│   ├── test_placeholder.py
+│   ├── test_generacion.py
+│   ├── test_procesamiento.py
+│   ├── test_analisis.py
+│   └── test_api.py
+├── data/
 ├── docs/
-│   └── README.md                  # Guia para la documentacion (graficas de validacion, etc.)
-├── .github/workflows/ci.yml       # CI: ruff + pytest en cada push/PR
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── .gitignore
-├── pyproject.toml                 # Dependencias y configuracion (ruff, pytest)
+├── pyproject.toml
+├── uv.lock
 └── README.md
 ```
 
@@ -175,12 +187,14 @@ Cada milestone expone lo que construye: los routers y schemas de `signals` se ag
 
 ## Estrategia de trabajo con Git:
 
-Para poder organizar mejor la metodología de trabajo en grupo, lo haremos de la siguiente manera:
-- `main` será la rama principal.
-- Para cada tarea crearemos una rama aparte.
-- Cada rama tendra un nombre relacionado con la tarea.
-- Cuando terminemos un cambio, lo pasaremos a `main` mediante un Pull Request.
-- Los commits tendran mensajes cortos que indiquen que se modificó.
+Para organizarnos mejor durante el proyecto vamos a trabajar de la siguiente manera:
+
+- `main` será la rama principal y no se modificará directamente.
+- Para cada tarea o Issue se creará una rama aparte desde Git local.
+- Las ramas tendrán nombres relacionados con la tarea, por ejemplo: `feature/ruido-rosa`.
+- Cuando una tarea esté terminada se abrirá un Pull Request hacia `main`.
+- Cada Pull Request deberá ser revisado y aprobado por otro integrante antes de hacer el merge.
+- Para los commits utilizaremos Conventional Commits, por ejemplo: `feat:`, `fix:`, `docs:` o `test:`.
 
 
 ## Milestones y entregas (2C 2026)
@@ -286,11 +300,4 @@ o con un archivo `.env` en la raiz (ignorado por git).
 - Schroeder, M. R. (1965). *New method of measuring reverberation time.* JASA 37(3).
 - [FastAPI](https://fastapi.tiangolo.com/) · [Pydantic](https://docs.pydantic.dev/) ·
   [uv](https://docs.astral.sh/uv/)
-
-## 🌳 Branching Strategy (Estrategia de Ramas)
-Para mantener el repositorio ordenado y evitar romper la aplicación principal:
-- La rama `main` está protegida y no se edita directamente[cite: 1].
-- Para cada tarea o funcionalidad se crea una rama específica (ej. `feature/m1-senales`, `fix/routing`)[cite: 1].
-- Los cambios se integran a `main` mediante un **Pull Request** previa revisión del equipo[cite: 1].
-- Se utiliza *conventional commits* para los mensajes (ej. `feat:`, `fix:`, `chore:`).
 
