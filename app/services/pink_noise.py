@@ -7,44 +7,42 @@ import numpy as np
 
 
 def generate_pink_noise(duration: float, fs: int) -> np.ndarray:
-    """Genera una senal de ruido rosa de la duracion especificada.
-
-    El ruido rosa tiene una densidad espectral de potencia inversamente
-    proporcional a la frecuencia (1/f): cae -3 dB/octava, de modo que cada
-    octava contiene la misma energia. Por eso es util para mediciones acusticas.
-
-    Algoritmo recomendado: **Voss-McCartney**.
-
-    1. Definir ``N_bits`` generadores de ruido blanco (tipicamente 16-20).
-    2. Para cada muestra ``n``, actualizar el generador ``i`` cuando el bit ``i``
-       de ``n`` cambia respecto de ``n - 1`` (el generador ``i`` se actualiza
-       cada ``2**i`` muestras).
-    3. Sumar las salidas de todos los generadores.
-    4. Normalizar la senal resultante al rango [-1, 1].
-
-    Alternativa aceptable: generar ruido blanco y filtrarlo en frecuencia con
-    ``H(f) = 1/sqrt(f)`` (``np.fft.rfft`` -> dividir por ``sqrt(f)`` omitiendo
-    ``f = 0`` -> ``np.fft.irfft`` -> normalizar).
+    """Genera una señal de ruido rosa de la duración especificada.
 
     Parameters
     ----------
     duration : float
-        Duracion de la senal en segundos.
+        Duración de la señal en segundos.
     fs : int
         Frecuencia de muestreo en Hz.
 
     Returns
     -------
     np.ndarray
-        Senal de ruido rosa normalizada entre -1 y 1, de longitud
-        ``int(duration * fs)``.
-
-    References
-    ----------
-    .. [1] Voss, R. F. & Clarke, J. (1978). "1/f noise" in music: Music from
-       1/f noise. JASA 63(1), 258-263.
-    .. [2] https://www.firstpr.com.au/dsp/pink-noise/
+        Ruido rosa normalizado entre -1 y 1, de largo int(duration * fs).
     """
+
     n = int(duration * fs)
-    white = np.random.default_rng().standard_normal(n)
-    return white
+
+    # Generamos ruido blanco
+    rng = np.random.default_rng()
+    white = rng.standard_normal(n)
+
+    # Pasamos la señal al dominio de la frecuencia
+    spectrum = np.fft.rfft(white)
+    freqs = np.fft.rfftfreq(n, d=1 / fs)
+
+    # Aplicamos la caída característica del ruido rosa
+    scale = np.zeros_like(freqs)
+    scale[1:] = 1 / np.sqrt(freqs[1:])
+    spectrum = spectrum * scale
+
+    # Volvemos al dominio del tiempo
+    pink = np.fft.irfft(spectrum, n=n)
+
+    # Normalizamos entre -1 y 1
+    max_value = np.max(np.abs(pink))
+    if max_value > 0:
+        pink = pink / max_value
+
+    return pink
