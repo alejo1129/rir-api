@@ -32,6 +32,18 @@ def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.n
             dtype="float32",
         )
         sd.wait()  # Espera a que termine la reproduccion/grabacion
+
+        # Asegurar que el array retornado respete exactamente la duracion pedida (num_samples)
+        if recorded is not None and len(recorded) != num_samples:
+            pad_len = num_samples - len(recorded)
+            if pad_len > 0:
+                pad_width = (0, pad_len) if recorded.ndim == 1 else ((0, pad_len), (0, 0))
+                recorded = np.pad(recorded, pad_width)
+            else:
+                recorded = recorded[:num_samples]
+
         return recorded
     except Exception as err:
-        raise RuntimeError(f"Error durante la reproduccion/grabacion de audio: {err}") from err
+        raise RuntimeError(
+            f"Error durante la reproduccion/grabacion de audio: {err}"
+        ) from err

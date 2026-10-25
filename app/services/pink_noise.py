@@ -1,3 +1,8 @@
+"""Servicio de generacion de ruido rosa.
+
+Milestone 1: Generacion de senales.
+"""
+
 import numpy as np
 
 
