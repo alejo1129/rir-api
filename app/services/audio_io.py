@@ -42,6 +42,59 @@ def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.n
     RuntimeError
         Si no hay un dispositivo de audio disponible (con un mensaje informativo).
     """
-    # Importar sounddevice ACA adentro (import perezoso), no al inicio del modulo:
-    # import sounddevice as sd
-    raise NotImplementedError("Implementar en Milestone 1")
+
+    # Importar sounddevice dentro de la función para evitar
+    # depender del hardware de audio al importar el módulo.
+    import sounddevice as sd
+
+    # Convertir la señal a un arreglo NumPy.
+    signal = np.asarray(signal, dtype=np.float64)
+
+    # Validar los parámetros de grabación.
+    if fs <= 0:
+        raise ValueError("La frecuencia de muestreo debe ser positiva")
+
+    if record_duration <= 0:
+        raise ValueError("La duración debe ser positiva")
+
+    if signal.ndim not in (1, 2):
+        raise ValueError("La señal debe ser mono o estéreo")
+
+    if signal.size == 0:
+        raise ValueError("La señal no puede estar vacía")
+
+    # Calcular la duración mínima necesaria para reproducir
+    # la señal completa.
+    signal_duration = signal.shape[0] / fs
+
+    if record_duration < signal_duration:
+        raise ValueError("La grabación debe durar al menos lo mismo que la señal")
+
+    # Cantidad total de muestras a grabar.
+    frames = int(np.ceil(record_duration * fs))
+
+    # Agregar silencio al final para registrar la cola
+    # de reverberación de la sala.
+    if signal.ndim == 1:
+        playback = np.zeros(frames, dtype=np.float64)
+    else:
+        playback = np.zeros((frames, signal.shape[1]), dtype=np.float64)
+
+    playback[: signal.shape[0]] = signal
+
+    try:
+        # Reproducir y grabar simultáneamente.
+        recording = sd.playrec(
+            playback,
+            samplerate=fs,
+            channels=1,
+            dtype="float64",
+        )
+
+        # Esperar a que termine la operación.
+        sd.wait()
+
+    except sd.PortAudioError as error:
+        raise RuntimeError(f"No se pudo acceder al dispositivo de audio: {error}") from error
+
+    return recording
