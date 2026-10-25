@@ -1,30 +1,43 @@
 import numpy as np
 
-def generate_pink_noise(duration: float, fs: int = 44100, amplitude: float = 1.0) -> np.ndarray:
+
+def generate_pink_noise(duration: float, fs: int) -> np.ndarray:
+    """Genera una señal de ruido rosa de la duración especificada.
+
+    Parameters
+    ----------
+    duration : float
+        Duración de la señal en segundos.
+    fs : int
+        Frecuencia de muestreo en Hz.
+
+    Returns
+    -------
+    np.ndarray
+        Ruido rosa normalizado entre -1 y 1, de largo int(duration * fs).
     """
-    Genera ruido rosa aplicando un filtro 1/sqrt(f) al ruido blanco en el dominio de la frecuencia.
-    """
-    num_samples = int(duration * fs)
-    
-    # 1. Ruido blanco
-    white_noise = np.random.randn(num_samples)
-    
-    # 2. Transformada de Fourier
-    x = np.fft.rfft(white_noise)
-    
-    # 3. Filtro 1/f en potencia (1/sqrt(f) en amplitud)
-    frequencies = np.fft.rfftfreq(num_samples, d=1/fs)
-    frequencies[0] = 1.0  # Evitar división por cero
-    
-    pink_filter = 1.0 / np.sqrt(frequencies)
-    x_pink = x * pink_filter
-    
-    # 4. Transformada inversa
-    pink_noise = np.fft.irfft(x_pink, n=num_samples)
-    
-    # 5. Normalización
-    max_val = np.max(np.abs(pink_noise))
-    if max_val > 0:
-        pink_noise = (pink_noise / max_val) * amplitude
-        
-    return pink_noise.astype(np.float32)
+
+    n = int(duration * fs)
+
+    # Generamos ruido blanco
+    rng = np.random.default_rng()
+    white = rng.standard_normal(n)
+
+    # Pasamos la señal al dominio de la frecuencia
+    spectrum = np.fft.rfft(white)
+    freqs = np.fft.rfftfreq(n, d=1 / fs)
+
+    # Aplicamos la caída característica del ruido rosa
+    scale = np.zeros_like(freqs)
+    scale[1:] = 1 / np.sqrt(freqs[1:])
+    spectrum = spectrum * scale
+
+    # Volvemos al dominio del tiempo
+    pink = np.fft.irfft(spectrum, n=n)
+
+    # Normalizamos entre -1 y 1
+    max_value = np.max(np.abs(pink))
+    if max_value > 0:
+        pink = pink / max_value
+
+    return pink
