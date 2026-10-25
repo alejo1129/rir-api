@@ -44,6 +44,4 @@ def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.n
 
         return recorded
     except Exception as err:
-        raise RuntimeError(
-            f"Error durante la reproduccion/grabacion de audio: {err}"
-        ) from err
+        raise RuntimeError(f"Error durante la reproduccion/grabacion de audio: {err}") from err
