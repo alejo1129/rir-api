@@ -1,4 +1,4 @@
-﻿"""Servicio de filtrado por bandas de octava.
+"""Servicio de filtrado por bandas de octava.
 
 Milestone 2: Procesamiento de la respuesta al impulso.
 """

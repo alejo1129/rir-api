@@ -1,4 +1,4 @@
-﻿"""Utilidades de procesamiento de senales.
+"""Utilidades de procesamiento de senales.
 
 Milestone 2: Procesamiento de la respuesta al impulso.
 """
@@ -38,9 +38,7 @@ def load_audio(path: str | Path) -> tuple[np.ndarray, int]:
     return data, int(fs)
 
 
-def generate_synthetic_ir(
-    duration: float, t60_values: dict[float, float], fs: int
-) -> np.ndarray:
+def generate_synthetic_ir(duration: float, t60_values: dict[float, float], fs: int) -> np.ndarray:
     """Sintetiza una respuesta al impulso con valores de T60 conocidos por banda."""
     n_samples = int(duration * fs)
     t = np.arange(n_samples, dtype=np.float64) / fs
@@ -72,9 +70,7 @@ def generate_synthetic_ir(
     return ir.astype(np.float64)
 
 
-def get_impulse_response(
-    recording: np.ndarray, inverse_filter: np.ndarray
-) -> np.ndarray:
+def get_impulse_response(recording: np.ndarray, inverse_filter: np.ndarray) -> np.ndarray:
     """Obtiene la respuesta al impulso mediante deconvolucion de un sine sweep."""
     rec = np.asarray(recording, dtype=np.float64)
     inv = np.asarray(inverse_filter, dtype=np.float64)
