@@ -1,48 +1,38 @@
-"""Servicio de generacion de ruido rosa.
-
-Milestone 1: Generacion de senales.
-"""
-
 import numpy as np
 
 
 def generate_pink_noise(duration: float, fs: int) -> np.ndarray:
-    """Genera una señal de ruido rosa de la duración especificada.
+    # Usamos el método de Voss-McCartney en lugar de filtrar ruido blanco
+    # por FFT para trabajar directo en el dominio del tiempo.
+    # Con esto evitamos que el ruido se vuelva cíclico o repetitivo en
+    # archivos largos, logrando una señal continua y aperiódica.
 
-    Parameters
-    ----------
-    duration : float
-        Duración de la señal en segundos.
-    fs : int
-        Frecuencia de muestreo en Hz.
-
-    Returns
-    -------
-    np.ndarray
-        Ruido rosa normalizado entre -1 y 1, de largo int(duration * fs).
-    """
-
-    n = int(duration * fs)
-
-    # Generamos ruido blanco
+    n_samples = int(duration * fs)
+    num_rows = 16
     rng = np.random.default_rng()
-    white = rng.standard_normal(n)
 
-    # Pasamos la señal al dominio de la frecuencia
-    spectrum = np.fft.rfft(white)
-    freqs = np.fft.rfftfreq(n, d=1 / fs)
+    rows = rng.standard_normal(num_rows)
+    running_sum = np.sum(rows)
+    pink = np.zeros(n_samples, dtype=np.float64)
 
-    # Aplicamos la caída característica del ruido rosa
-    scale = np.zeros_like(freqs)
-    scale[1:] = 1 / np.sqrt(freqs[1:])
-    spectrum = spectrum * scale
+    for i in range(n_samples):
+        if i == 0:
+            idx = 0
+        else:
+            temp = i
+            idx = 0
+            while (temp & 1) == 0 and idx < num_rows - 1:
+                temp >>= 1
+                idx += 1
 
-    # Volvemos al dominio del tiempo
-    pink = np.fft.irfft(spectrum, n=n)
+        running_sum -= rows[idx]
+        rows[idx] = rng.standard_normal()
+        running_sum += rows[idx]
 
-    # Normalizamos entre -1 y 1
-    max_value = np.max(np.abs(pink))
-    if max_value > 0:
-        pink = pink / max_value
+        pink[i] = running_sum + rng.standard_normal()
+
+    max_val = np.max(np.abs(pink))
+    if max_val > 0:
+        pink /= max_val
 
     return pink

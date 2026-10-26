@@ -4,37 +4,34 @@ Milestone 2: Procesamiento de la respuesta al impulso.
 """
 
 import numpy as np
+from scipy import signal as sps
 
 
 def filter_single_band(
     signal: np.ndarray, fs: int, center_freq: float, order: int = 4
 ) -> np.ndarray:
-    """Aplica un filtro pasabanda de una octava centrado en ``center_freq`` (IEC 61260).
+    """Aplica un filtro pasabanda de una octava centrado en `center_freq` (IEC 61260)."""
+    signal_arr = np.asarray(signal, dtype=np.float64)
 
-    Filtro Butterworth pasabanda (``scipy.signal.butter`` con ``output='sos'``)
-    con frecuencias de corte:
+    # 1. Calculamos las frecuencias de corte inferior y superior de la octava
+    f_low = center_freq / np.sqrt(2.0)
+    f_high = center_freq * np.sqrt(2.0)
 
-    - inferior: ``center_freq / sqrt(2)``
-    - superior: ``center_freq * sqrt(2)``
+    # 2. Nos aseguramos de no pasarnos de la frecuencia de Nyquist (fs / 2)
+    nyquist = fs / 2.0
+    if f_high >= nyquist:
+        f_high = nyquist * 0.999
 
-    Aplicarlo con ``scipy.signal.sosfiltfilt`` (fase cero), importante para no
-    distorsionar EDT y T60. La forma ``(b, a)`` con ``filtfilt`` es inestable en
-    las bandas graves.
+    # 3. Disenamos el filtro Butterworth pasabanda en formato SOS
+    sos = sps.butter(
+        N=order,
+        Wn=[f_low, f_high],
+        btype="bandpass",
+        fs=fs,
+        output="sos",
+    )
 
-    Parameters
-    ----------
-    signal : np.ndarray
-        Senal de entrada (array 1D).
-    fs : int
-        Frecuencia de muestreo en Hz.
-    center_freq : float
-        Frecuencia central de la banda de octava en Hz.
-    order : int, optional
-        Orden del filtro Butterworth (por defecto 4).
+    # 4. Aplicamos el filtro con fase cero (ida y vuelta)
+    filtered = sps.sosfiltfilt(sos, signal_arr)
 
-    Returns
-    -------
-    np.ndarray
-        Senal filtrada (array 1D, misma longitud que ``signal``).
-    """
-    raise NotImplementedError("Implementar en Milestone 2")
+    return filtered.astype(np.float64)
