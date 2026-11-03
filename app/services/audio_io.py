@@ -22,25 +22,25 @@ def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.n
     # Calcular el numero total de muestras a grabar
     num_samples = int(record_duration * fs)
 
+    # Completar la señal con silencio si dura menos que la grabacion
+    if len(signal) < num_samples:
+        pad_len = num_samples - len(signal)
+
+        if signal.ndim == 1:
+            signal_to_play = np.pad(signal, (0, pad_len))
+        else:
+            signal_to_play = np.pad(signal, ((0, pad_len), (0, 0)))
+    else:
+        signal_to_play = signal[:num_samples]
+
     try:
-        # playrec reproduce la senal y graba simultaneamente durante num_samples
         recorded = sd.playrec(
-            signal,
+            signal_to_play,
             samplerate=fs,
             channels=1,
-            frames=num_samples,
             dtype="float32",
         )
-        sd.wait()  # Espera a que termine la reproduccion/grabacion
-
-        # Asegurar que el array retornado respete exactamente la duracion pedida (num_samples)
-        if recorded is not None and len(recorded) != num_samples:
-            pad_len = num_samples - len(recorded)
-            if pad_len > 0:
-                pad_width = (0, pad_len) if recorded.ndim == 1 else ((0, pad_len), (0, 0))
-                recorded = np.pad(recorded, pad_width)
-            else:
-                recorded = recorded[:num_samples]
+        sd.wait()
 
         return recorded
     except Exception as err:
