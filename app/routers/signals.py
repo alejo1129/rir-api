@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException
 
 from app.routers.audio_http import wav_response
-from app.schemas.signals import PinkNoiseRequest, SineSweepRequest
+from app.schemas.signals import PinkNoiseRequest, SineSweepRequest, SyntheticIRRequest
 from app.services.pink_noise import generate_pink_noise
+from app.services.signal_utils import generate_synthetic_ir
 from app.services.sine_sweep import generate_sine_sweep_pair
 
 router = APIRouter()
@@ -41,3 +42,14 @@ async def sine_sweep(req: SineSweepRequest):
         req.sample_rate,
         "sine_sweep.wav",
     )
+
+
+@router.post("/synthetic-ir")
+async def synthetic_ir(req: SyntheticIRRequest):
+    try:
+        t60_float = {float(k): float(v) for k, v in req.t60_values.items()}
+        ir = generate_synthetic_ir(req.duration, t60_float, req.sample_rate)
+    except ValueError as err:
+        raise HTTPException(status_code=422, detail=str(err)) from err
+
+    return wav_response(ir, req.sample_rate, "synthetic_ir.wav")
