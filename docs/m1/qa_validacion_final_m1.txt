@@ -1,0 +1,13 @@
+QA M1 - validacion final
+
+Resumen:
+- pytest -v: 19 passed, 18 xfailed, 14 xpassed, 1 warning
+- ruff check .: All checks passed
+- ruff format --check .: 24 files already formatted
+- Estado git: working tree clean en main
+
+Observaciones:
+- Los tests de M1 quedaron en PASSED.
+- Los xfailed/xpassed restantes corresponden a M2 y M3.
+- Se valido play_and_record con hardware real (Focusrite + parlante + microfono).
+- Evidencias asociadas: qa_play_and_record_real.png y qa_play_and_record_real.txt

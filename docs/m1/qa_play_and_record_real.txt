@@ -1,0 +1,8 @@
+Frecuencia de muestreo: 48000 Hz
+Duracion tono: 0.5 s
+Duracion grabada: 1.5 s
+Muestras grabadas: 72000
+Maximo: 0.0030517578125
+RMS: 0.000604360131546855
+Dispositivo entrada: Focusrite Analogue 1 + 2
+Dispositivo salida: Focusrite Altavoces
