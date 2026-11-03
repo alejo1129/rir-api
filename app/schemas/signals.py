@@ -12,3 +12,9 @@ class SineSweepRequest(BaseModel):
     end_freq: float = Field(default=20000, ge=1, le=22050)
     sample_rate: int = Field(default=44100, ge=8000, le=192000)
     inverse: bool = False
+
+
+class SyntheticIRRequest(BaseModel):
+    duration: float = Field(gt=0, le=60)
+    t60_values: dict[str, float]
+    sample_rate: int = Field(default=44100, ge=8000, le=192000)
