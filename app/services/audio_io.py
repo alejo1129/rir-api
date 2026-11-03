@@ -10,7 +10,28 @@ import numpy as np
 
 
 def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.ndarray:
-    """Reproduce una senal y graba simultaneamente (``sounddevice.playrec``)."""
+    """Reproduce una senal y graba simultaneamente usando sounddevice.
+
+    Parameters
+    ----------
+    signal : np.ndarray
+        Senal de audio que se va a reproducir.
+    fs : int
+        Frecuencia de muestreo en Hz.
+    record_duration : float
+        Duracion total de la grabacion en segundos.
+
+    Returns
+    -------
+    np.ndarray
+        Senal grabada por el dispositivo de entrada.
+
+    Raises
+    ------
+    RuntimeError
+        Si no se puede inicializar el dispositivo de audio o si ocurre
+        un error durante la reproduccion o grabacion.
+    """
     try:
         import sounddevice as sd
     except Exception as err:

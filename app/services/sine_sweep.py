@@ -9,7 +9,25 @@ import numpy as np
 def generate_sine_sweep_pair(
     duration: float, f1: float, f2: float, fs: int
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Genera un barrido senoidal logaritmico (sine sweep) y su filtro inverso."""
+    """Genera un barrido senoidal logaritmico y su filtro inverso.
+
+    Parameters
+    ----------
+    duration : float
+        Duracion del barrido en segundos.
+    f1 : float
+        Frecuencia inicial del barrido en Hz.
+    f2 : float
+        Frecuencia final del barrido en Hz.
+    fs : int
+        Frecuencia de muestreo en Hz.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Tupla con el sine sweep y su filtro inverso, ambos normalizados
+        entre -1 y 1.
+    """
     n_samples = int(duration * fs)
     t = np.arange(n_samples, dtype=np.float64) / fs
 
