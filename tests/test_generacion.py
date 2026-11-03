@@ -1,9 +1,4 @@
-"""Tests para los servicios de generacion de senales (Milestone 1).
-
-Mientras las funciones lancen ``NotImplementedError`` estos tests quedan como
-``xfail`` (no ponen el CI en rojo). Cuando las implementen, pasan a ``XPASS``;
-si la implementacion es incorrecta, fallan con ``AssertionError``.
-"""
+"""Tests para los servicios de generacion de senales (Milestone 1)."""
 
 import sys
 import types
@@ -15,10 +10,6 @@ from scipy import signal as sps
 from app.services.audio_io import play_and_record
 from app.services.pink_noise import generate_pink_noise
 from app.services.sine_sweep import generate_sine_sweep_pair
-
-pytestmark = pytest.mark.xfail(
-    raises=NotImplementedError, strict=False, reason="se implementa en M1"
-)
 
 
 # --------------------------------------------------------------------------- #
