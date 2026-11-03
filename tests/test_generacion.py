@@ -107,10 +107,13 @@ def _sounddevice_falso(hay_dispositivo: bool = True) -> types.ModuleType:
     class PortAudioError(Exception):
         pass
 
-    def playrec(data, samplerate=None, channels=None, blocking=False, **kwargs):
+    def playrec(data, samplerate=None, channels=None, blocking=False, dtype=None):
         if not hay_dispositivo:
             raise PortAudioError("No hay dispositivo de audio")
+
         data = np.asarray(data)
+        sd.ultimo_playrec = data.copy()
+
         canales = channels or (1 if data.ndim == 1 else data.shape[1])
         return np.zeros((data.shape[0], canales))
 
@@ -133,6 +136,7 @@ def _sounddevice_falso(hay_dispositivo: bool = True) -> types.ModuleType:
     sd.check_input_settings = lambda *args, **kwargs: query_devices()
     sd.check_output_settings = lambda *args, **kwargs: query_devices()
     sd.default = types.SimpleNamespace(device=(0, 0), samplerate=None, channels=None)
+
     return sd
 
 
@@ -152,3 +156,24 @@ def test_play_and_record_shape(monkeypatch):
     monkeypatch.setitem(sys.modules, "sounddevice", _sounddevice_falso(hay_dispositivo=False))
     with pytest.raises(RuntimeError):
         play_and_record(mono, fs, record_duration)
+
+
+def test_play_and_record_padding(monkeypatch):
+    """Completa con ceros la reproduccion hasta record_duration."""
+    fs = 1000
+    record_duration = 2.0
+    esperado = int(record_duration * fs)
+
+    sd_falso = _sounddevice_falso()
+    monkeypatch.setitem(sys.modules, "sounddevice", sd_falso)
+
+    # Señal de 1 segundo con valor 1.
+    senal = np.ones(fs)
+
+    play_and_record(senal, fs, record_duration)
+
+    enviado = sd_falso.ultimo_playrec
+
+    assert enviado.shape[0] == esperado
+    assert np.all(enviado[:fs] == 1)
+    assert np.all(enviado[fs:] == 0)
