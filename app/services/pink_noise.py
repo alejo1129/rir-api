@@ -2,6 +2,21 @@ import numpy as np
 
 
 def generate_pink_noise(duration: float, fs: int) -> np.ndarray:
+    """Genera una señal de ruido rosa de la duración especificada.
+
+    Parameters
+    ----------
+    duration : float
+        Duración de la señal en segundos.
+    fs : int
+        Frecuencia de muestreo en Hz.
+
+    Returns
+    -------
+    np.ndarray
+        Ruido rosa normalizado entre -1 y 1, de largo int(duration * fs).
+    """
+
     # Usamos el método de Voss-McCartney en lugar de filtrar ruido blanco
     # por FFT para trabajar directo en el dominio del tiempo.
     # Con esto evitamos que el ruido se vuelva cíclico o repetitivo en
