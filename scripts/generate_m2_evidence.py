@@ -8,7 +8,12 @@ import numpy as np
 from scipy.signal import butter, correlate, correlation_lags, fftconvolve, sosfilt
 
 from app.services.filter import filter_single_band
-from app.services.signal_utils import generate_synthetic_ir, get_impulse_response
+from app.services.signal_utils import (
+    generate_synthetic_ir,
+    get_impulse_response,
+    load_audio,
+    logarithmic_scale_conversion,
+)
 from app.services.sine_sweep import generate_sine_sweep_pair
 
 
@@ -89,6 +94,7 @@ def main() -> None:
     print(f"Gráfico guardado en: {output_path}")
     generate_deconvolution_plot()
     generate_filter_plot()
+    generate_real_ir_plots()
 
 
 def generate_deconvolution_plot() -> None:
@@ -252,6 +258,139 @@ def generate_filter_plot() -> None:
         print(f"  {frequency:8.2f} Hz: {value:7.2f} dB")
 
     print(f"Gráfico guardado en: {output_path}")
+
+
+def estimate_rt60(signal: np.ndarray, sample_rate: int) -> tuple[float, float]:
+    peak_index = int(np.argmax(np.abs(signal)))
+    signal = signal[peak_index:]
+
+    energy = signal**2
+    decay = np.cumsum(energy[::-1])[::-1]
+
+    decay = decay / decay[0]
+    decay_db = 10 * np.log10(np.maximum(decay, 1e-12))
+    time = np.arange(len(decay_db)) / sample_rate
+
+    index_5 = np.where(decay_db <= -5)[0][0]
+    index_25 = np.where(decay_db <= -25)[0][0]
+
+    x = time[index_5 : index_25 + 1]
+    y = decay_db[index_5 : index_25 + 1]
+
+    slope, intercept = np.polyfit(x, y, 1)
+    fitted = slope * x + intercept
+
+    residual = np.sum((y - fitted) ** 2)
+    total = np.sum((y - np.mean(y)) ** 2)
+    r_squared = 1 - residual / total
+
+    rt60 = -60 / slope
+
+    return float(rt60), float(r_squared)
+
+
+def generate_real_ir_plot(
+    audio_path: Path,
+    output_name: str,
+    title: str,
+) -> None:
+    signal, sample_rate = load_audio(audio_path)
+
+    rt60, r_squared = estimate_rt60(signal, sample_rate)
+
+    time = np.arange(len(signal)) / sample_rate
+
+    spectrum = np.abs(np.fft.rfft(signal))
+    frequencies = np.fft.rfftfreq(len(signal), 1 / sample_rate)
+    spectrum_db = logarithmic_scale_conversion(spectrum)
+
+    peak_index = int(np.argmax(np.abs(signal)))
+
+    center_frequencies = [125, 250, 500, 1000, 2000, 4000, 8000]
+
+    figure, axes = plt.subplots(3, 1, figsize=(11, 12))
+
+    axes[0].plot(time, signal, linewidth=0.7)
+    axes[0].set_title("Forma de onda")
+    axes[0].set_xlabel("Tiempo (s)")
+    axes[0].set_ylabel("Amplitud")
+    axes[0].grid(True)
+
+    axes[1].plot(frequencies[1:], spectrum_db[1:], linewidth=0.8)
+    axes[1].set_xscale("log")
+    axes[1].set_xlim(20, sample_rate / 2)
+    axes[1].set_ylim(-120, 5)
+    axes[1].set_title("Espectro")
+    axes[1].set_xlabel("Frecuencia (Hz)")
+    axes[1].set_ylabel("Magnitud relativa (dB)")
+    axes[1].grid(True, which="both")
+
+    for center_frequency in center_frequencies:
+        filtered = filter_single_band(
+            signal,
+            sample_rate,
+            center_frequency,
+        )
+
+        filtered = filtered[peak_index:]
+
+        energy = np.cumsum(filtered[::-1] ** 2)[::-1]
+
+        if energy[0] <= 0:
+            continue
+
+        energy = energy / energy[0]
+        decay_db = 10 * np.log10(np.maximum(energy, 1e-12))
+        decay_time = np.arange(len(decay_db)) / sample_rate
+
+        axes[2].plot(
+            decay_time,
+            decay_db,
+            label=f"{center_frequency} Hz",
+            linewidth=1,
+        )
+
+    axes[2].set_title("Decaimiento energético por bandas de octava")
+    axes[2].set_xlabel("Tiempo desde el pico (s)")
+    axes[2].set_ylabel("Nivel relativo (dB)")
+    axes[2].set_ylim(-80, 5)
+    axes[2].grid(True)
+    axes[2].legend()
+
+    figure.suptitle(
+        f"{title} | fs = {sample_rate} Hz | duración = {len(signal) / sample_rate:.3f} s"
+    )
+
+    figure.tight_layout()
+
+    project_root = Path(__file__).resolve().parents[1]
+    output_dir = project_root / "docs" / "m2" / "images"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = output_dir / output_name
+    figure.savefig(output_path, dpi=160, bbox_inches="tight")
+    plt.close(figure)
+
+    print(f"RI real analizada: {audio_path}")
+    print(f"RT60 estimado (T20): {rt60:.3f} s | R2 = {r_squared:.3f}")
+    print(f"Gráfico guardado en: {output_path}")
+
+
+def generate_real_ir_plots() -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    audio_dir = project_root / "docs" / "m2" / "audio"
+
+    generate_real_ir_plot(
+        audio_dir / "ri_t60_corto_car.wav",
+        "ri_real_t60_corto_car.png",
+        "RI real - T60 corto - Car",
+    )
+
+    generate_real_ir_plot(
+        audio_dir / "ri_t60_largo_stairwell.wav",
+        "ri_real_t60_largo_stairwell.png",
+        "RI real - T60 largo - Stairwell",
+    )
 
 
 if __name__ == "__main__":

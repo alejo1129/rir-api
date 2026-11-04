@@ -67,6 +67,8 @@ coverage.xml
 
 # Audio files (mediciones)
 *.wav
+!docs/m2/audio/ri_t60_corto_car.wav
+!docs/m2/audio/ri_t60_largo_stairwell.wav
 *.flac
 *.ogg
 *.mp3
