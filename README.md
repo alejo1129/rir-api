@@ -231,6 +231,8 @@ Para organizarnos mejor durante el proyecto vamos a trabajar de la siguiente man
 - [ ] Tests de `tests/test_generacion.py` y los de M1 en `tests/test_api.py` pasando;
       graficas de validacion en `docs/m1/`.
 
+**Evidencias de validación de M1:** [Configuración de audio, prueba física y resultados de QA](docs/m1/evidencia.md).
+
 ### M2 · Procesamiento de la RI (`v0.2.0`)
 
 - [x] `load_audio()`, `generate_synthetic_ir()`, `get_impulse_response()` y
@@ -340,7 +342,7 @@ La ejecución de uv run pytest -v obtuvo:
 
 0 tests fallidos.
 
-Las evidencias detalladas y la metodología de validación se encuentran en docs/m2/evidencia.md.
+Las evidencias detalladas, los resultados experimentales y la metodología de validación de M2 se encuentran en [Evidencias de validación — M2](docs/m2/evidencia.md)
 
 ### M3 · Producto final (`v1.0.0`)
 
