@@ -13,7 +13,27 @@ from app.services.filter import filter_single_band
 
 
 def load_audio(path: str | Path) -> tuple[np.ndarray, int]:
-    """Carga un archivo de audio (al menos WAV y FLAC) y retorna senal y fs."""
+    """Carga un archivo de audio y devuelve la senal junto con su frecuencia de muestreo.
+
+    Parameters
+    ----------
+    path : str | Path
+        Ruta del archivo de audio que se desea cargar.
+
+    Returns
+    -------
+    tuple[np.ndarray, int]
+        Tupla con la senal de audio mono en formato float64 y la frecuencia
+        de muestreo en Hz.
+
+    Raises
+    ------
+    FileNotFoundError
+        Si el archivo indicado no existe.
+    ValueError
+        Si el archivo no puede ser interpretado como un archivo de audio valido.
+    """
+
     file_path = Path(path)
     if not file_path.is_file():
         raise FileNotFoundError(f"El archivo de audio no existe: {file_path}")
@@ -39,7 +59,29 @@ def load_audio(path: str | Path) -> tuple[np.ndarray, int]:
 
 
 def generate_synthetic_ir(duration: float, t60_values: dict[float, float], fs: int) -> np.ndarray:
-    """Sintetiza una respuesta al impulso con valores de T60 conocidos por banda."""
+    """Genera una respuesta al impulso sintetica a partir de valores de T60 por banda.
+
+    Parameters
+    ----------
+    duration : float
+        Duracion total de la respuesta al impulso en segundos.
+    t60_values : dict[float, float]
+        Diccionario que relaciona cada frecuencia central de banda en Hz
+        con su valor de T60 en segundos.
+    fs : int
+        Frecuencia de muestreo en Hz.
+
+    Returns
+    -------
+    np.ndarray
+        Respuesta al impulso sintetica normalizada entre -1 y 1.
+
+    Raises
+    ------
+    ValueError
+        Si alguno de los valores de T60 es menor o igual que cero.
+    """
+
     n_samples = int(duration * fs)
     t = np.arange(n_samples, dtype=np.float64) / fs
     ir = np.zeros(n_samples, dtype=np.float64)
@@ -71,7 +113,22 @@ def generate_synthetic_ir(duration: float, t60_values: dict[float, float], fs: i
 
 
 def get_impulse_response(recording: np.ndarray, inverse_filter: np.ndarray) -> np.ndarray:
-    """Obtiene la respuesta al impulso mediante deconvolucion de un sine sweep."""
+    """Obtiene la respuesta al impulso mediante deconvolucion de un sine sweep.
+
+    Parameters
+    ----------
+    recording : np.ndarray
+        Senal grabada durante la reproduccion del sine sweep.
+    inverse_filter : np.ndarray
+        Filtro inverso asociado al sine sweep utilizado en la medicion.
+
+    Returns
+    -------
+    np.ndarray
+        Respuesta al impulso normalizada entre -1 y 1 y recortada desde
+        el pico principal.
+    """
+
     rec = np.asarray(recording, dtype=np.float64)
     inv = np.asarray(inverse_filter, dtype=np.float64)
 
@@ -90,7 +147,20 @@ def get_impulse_response(recording: np.ndarray, inverse_filter: np.ndarray) -> n
 
 
 def logarithmic_scale_conversion(signal: np.ndarray) -> np.ndarray:
-    """Convierte una senal a escala logaritmica (dB) normalizada."""
+    """Convierte una senal a escala logaritmica en decibeles.
+
+    Parameters
+    ----------
+    signal : np.ndarray
+        Senal de entrada que se desea convertir a escala logaritmica.
+
+    Returns
+    -------
+    np.ndarray
+        Senal expresada en decibeles y normalizada respecto de su valor
+        maximo, de modo que el maximo corresponde a 0 dB.
+    """
+
     sig = np.asarray(signal, dtype=np.float64)
     abs_sig = np.abs(sig)
     max_val = np.max(abs_sig)
