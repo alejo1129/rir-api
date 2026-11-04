@@ -10,7 +10,25 @@ from scipy import signal as sps
 def filter_single_band(
     signal: np.ndarray, fs: int, center_freq: float, order: int = 4
 ) -> np.ndarray:
-    """Aplica un filtro pasabanda de una octava centrado en `center_freq` (IEC 61260)."""
+    """Aplica un filtro pasabanda de una octava centrado en una frecuencia dada.
+
+    Parameters
+    ----------
+    signal : np.ndarray
+        Senal de entrada que se desea filtrar.
+    fs : int
+        Frecuencia de muestreo en Hz.
+    center_freq : float
+        Frecuencia central de la banda de octava en Hz.
+    order : int, optional
+        Orden del filtro Butterworth, por defecto 4.
+
+    Returns
+    -------
+    np.ndarray
+        Senal filtrada en la banda de octava correspondiente.
+    """
+
     signal_arr = np.asarray(signal, dtype=np.float64)
 
     # 1. Calculamos las frecuencias de corte inferior y superior de la octava
