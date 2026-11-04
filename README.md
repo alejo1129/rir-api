@@ -240,6 +240,108 @@ Para organizarnos mejor durante el proyecto vamos a trabajar de la siguiente man
       (recibe un WAV subido).
 - [ ] Tests de `tests/test_procesamiento.py` y los de M2 en `tests/test_api.py` pasando.
 
+Endpoints implementados en M2
+
+Generación de respuesta al impulso sintética
+
+POST /api/v1/signals/synthetic-ir
+
+Genera una respuesta al impulso sintética a partir de la duración, los valores de T60 por banda de frecuencia y la frecuencia de muestreo. Devuelve un archivo WAV.
+
+Ejemplo de solicitud:
+
+curl -X POST "http://127.0.0.1:8000/api/v1/signals/synthetic-ir" -H "Content-Type: application/json" -d '{"duration":2.4,"t60_values":{"1000":0.8},"sample_rate":44100}' -o synthetic_ir.wav
+
+Filtrado de banda
+
+POST /api/v1/filters/single-band
+
+Recibe un archivo de audio WAV y una frecuencia central (center_freq). Devuelve el audio filtrado en formato WAV.
+
+Ejemplo de solicitud:
+
+curl -X POST "http://127.0.0.1:8000/api/v1/filters/single-band" -F "file=@synthetic_ir.wav" -F "center_freq=1000" -o filtered.wav
+
+Nota: en Windows PowerShell, utilizar curl.exe en lugar de curl.
+
+Validación
+
+Se realizaron pruebas de validación para las funcionalidades implementadas en M2.
+
+1. Generación de respuesta al impulso sintética
+
+Se generó una respuesta al impulso con un T60 objetivo de 0,8 segundos en la banda de 1.000 Hz.
+
+Resultados:
+
+T60 objetivo: 0,800 s.
+
+T60 estimado: 0,844 s.
+
+Error relativo: 5,5 %.
+
+El resultado presenta una buena concordancia con el valor configurado.
+
+
+
+2. Recuperación mediante deconvolución
+
+Se comparó una respuesta al impulso de referencia con la respuesta recuperada mediante deconvolución de un sine sweep.
+
+Resultado:
+
+Correlación obtenida: 1,0000.
+
+La correlación demuestra una coincidencia prácticamente perfecta entre ambas respuestas en esta simulación.
+
+
+
+3. Filtro de banda de octava IEC 61260
+
+Se evaluó la respuesta en frecuencia de un filtro centrado en 1.000 Hz.
+
+Resultados obtenidos:
+
+Frecuencia
+
+Ganancia
+
+500 Hz
+
+-52,21 dB
+
+707,11 Hz
+
+-6,02 dB
+
+1.000 Hz
+
+0,00 dB
+
+1.414,21 Hz
+
+-6,02 dB
+
+2.000 Hz
+
+-52,55 dB
+
+La respuesta presenta una ganancia máxima en la frecuencia central, una atenuación de aproximadamente 6 dB en los límites de la banda y una atenuación superior a 50 dB en las frecuencias adyacentes.
+
+
+
+4. Resultado de las pruebas automatizadas
+
+La ejecución de uv run pytest -v obtuvo:
+
+36 tests aprobados.
+
+15 tests marcados como XFAIL, correspondientes a funcionalidades previstas para M3.
+
+0 tests fallidos.
+
+Las evidencias detalladas y la metodología de validación se encuentran en docs/m2/evidencia.md.
+
 ### M3 · Producto final (`v1.0.0`)
 
 - [ ] `apply_smoothing()`, `apply_schroeder_integral()`, `linear_regression()` y

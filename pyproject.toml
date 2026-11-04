@@ -27,6 +27,7 @@ dev = [
     "pytest-cov",
     "httpx",
     "ruff",
+    "matplotlib>=3.11.2",
 ]
 
 [tool.ruff]
