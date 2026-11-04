@@ -60,6 +60,26 @@ class TestApplySmoothing:
         assert len(env) == len(x)
         assert np.all(env >= 0)
 
+    def test_smoothing_invalid_method(self):
+        """Un metodo desconocido debe producir ValueError."""
+        signal = np.ones(100)
+
+        with pytest.raises(ValueError):
+            apply_smoothing(signal, fs=8000, method="invalid")
+
+    @pytest.mark.parametrize("window_ms", [0, -10])
+    def test_smoothing_invalid_window(self, window_ms):
+        """La ventana de media movil debe ser positiva."""
+        signal = np.ones(100)
+
+        with pytest.raises(ValueError):
+            apply_smoothing(
+                signal,
+                fs=8000,
+                method="moving_average",
+                window_ms=window_ms,
+            )
+
 
 # --------------------------------------------------------------------------- #
 # Integral de Schroeder
