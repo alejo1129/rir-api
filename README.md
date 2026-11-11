@@ -223,13 +223,13 @@ Para organizarnos mejor durante el proyecto vamos a trabajar de la siguiente man
 
 ### M1 · Generacion de senales (`v0.1.0`)
 
-- [ ] `generate_pink_noise()` en `app/services/pink_noise.py` (Voss-McCartney recomendado).
-- [ ] `generate_sine_sweep_pair()` (sweep + filtro inverso) en `app/services/sine_sweep.py`.
-- [ ] `play_and_record()` en `app/services/audio_io.py`.
-- [ ] Endpoints `POST /api/v1/signals/pink-noise` y `POST /api/v1/signals/sine-sweep` (devuelven WAV),
+- [x] `generate_pink_noise()` en `app/services/pink_noise.py` (Voss-McCartney recomendado).
+- [x] `generate_sine_sweep_pair()` (sweep + filtro inverso) en `app/services/sine_sweep.py`.
+- [x] `play_and_record()` en `app/services/audio_io.py`.
+- [x] Endpoints `POST /api/v1/signals/pink-noise` y `POST /api/v1/signals/sine-sweep` (devuelven WAV),
       con sus schemas en `app/schemas/signals.py`.
-- [ ] Tests de `tests/test_generacion.py` y los de M1 en `tests/test_api.py` pasando;
-      graficas de validacion en `docs/m1/`.
+- [x] Tests de `tests/test_generacion.py` y los de M1 en `tests/test_api.py` pasando;
+      graficas de validacion en [`docs/m1/evidencia.md`](docs/m1/evidencia.md).
 
 ### M2 · Procesamiento de la RI (`v0.2.0`)
 
