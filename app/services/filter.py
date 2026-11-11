@@ -37,6 +37,9 @@ def filter_single_band(
 
     # 2. Nos aseguramos de no pasarnos de la frecuencia de Nyquist (fs / 2)
     nyquist = fs / 2.0
+    if f_low >= nyquist:
+        raise ValueError("La frecuencia de la banda debe estar por debajo de Nyquist")
+
     if f_high >= nyquist:
         f_high = nyquist * 0.999
 

@@ -108,6 +108,16 @@ def test_filters_single_band_endpoint():
     assert len(filtrada) == fs
 
 
+def test_filter_frequency_above_nyquist_returns_422():
+    fs = 44100
+    ruido = np.random.default_rng(2).standard_normal(fs) * 0.5
+    archivos = {"file": ("ruido.wav", _wav_en_memoria(ruido, fs), "audio/wav")}
+    response = client.post(
+        "/api/v1/filters/single-band", files=archivos, data={"center_freq": 40000}
+    )
+    assert response.status_code == 422
+
+
 def test_invalid_file_returns_422():
     archivos = {"file": ("no_es_audio.wav", b"esto no es audio", "audio/wav")}
     response = client.post(
