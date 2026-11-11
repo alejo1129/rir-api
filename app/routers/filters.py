@@ -21,4 +21,3 @@ async def single_band_filter(
     except ValueError as err:
         raise HTTPException(status_code=422, detail=str(err)) from err
     return wav_response(filtered, fs, "filtered.wav")
-
