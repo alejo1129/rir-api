@@ -215,11 +215,11 @@ Para organizarnos mejor durante el proyecto vamos a trabajar de la siguiente man
 
 ### M0 · El plano
 
-- [ ] Repositorio del grupo creado a partir del template, con los docentes como colaboradores.
-- [ ] `uv sync`, `uv run uvicorn app.main:app --reload` y `uv run pytest` funcionan.
-- [ ] README con integrantes y roles, instalacion, estructura y branching strategy.
-- [ ] Diagrama de arquitectura (Mermaid o draw.io) con todos los modulos de M1, M2 y M3.
-- [ ] Al menos 10 issues con labels (`milestone-1`, `milestone-2`, `milestone-3`) y asignados.
+- [x] Repositorio del grupo creado a partir del template, con los docentes como colaboradores.
+- [x] `uv sync`, `uv run uvicorn app.main:app --reload` y `uv run pytest` funcionan.
+- [x] README con integrantes y roles, instalacion, estructura y branching strategy.
+- [x] Diagrama de arquitectura (Mermaid o draw.io) con todos los modulos de M1, M2 y M3.
+- [x] Al menos 10 issues con labels (`milestone-1`, `milestone-2`, `milestone-3`) y asignados.
 
 ### M1 · Generacion de senales (`v0.1.0`)
 
