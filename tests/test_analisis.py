@@ -120,6 +120,29 @@ class TestLinearRegression:
         assert abs(intercept - 5.0) < 0.2
         assert 0.99 < r2 <= 1.0
 
+    def test_linear_regression_negative_slope(self):
+        """Verifica una pendiente negativa con tiempos no equidistantes."""
+        x = np.array([0.0, 0.1, 0.35, 0.9, 1.5])
+        y = -40.0 * x + 5.0
+
+        slope, intercept, r2 = linear_regression(x, y)
+
+        assert slope == pytest.approx(-40.0, abs=1e-10)
+        assert intercept == pytest.approx(5.0, abs=1e-10)
+        assert r2 == pytest.approx(1.0, abs=1e-10)
+
+    def test_linear_regression_order_invariance(self):
+        """El orden de las muestras no debe alterar la regresion."""
+        x = np.array([0.0, 0.2, 0.5, 0.9, 1.4])
+        y = -35.0 * x + 3.0
+
+        order = np.array([3, 0, 4, 1, 2])
+
+        original = linear_regression(x, y)
+        reordered = linear_regression(x[order], y[order])
+
+        np.testing.assert_allclose(original, reordered, atol=1e-10)
+
 
 # --------------------------------------------------------------------------- #
 # Parametros acusticos
