@@ -149,3 +149,37 @@ class TestCalculateParametersFromIR:
         params = calculate_parameters_from_ir(_exponential_ir(0.3, fs, 1.0), fs)
         for valor in params["C80"].values():
             assert valor > 0
+
+    def test_parameters_amplitude_invariance(self):
+        """Escalar la amplitud de la IR no debe cambiar los parametros."""
+        fs = 44100
+        ir = _exponential_ir(1.0, fs, 2.0)
+
+        original = calculate_parameters_from_ir(ir, fs)
+        scaled = calculate_parameters_from_ir(3.0 * ir, fs)
+
+        for parameter in ("EDT", "T20", "T30", "D50", "C80"):
+            assert original[parameter].keys() == scaled[parameter].keys()
+
+            for band in original[parameter]:
+                assert scaled[parameter][band] == pytest.approx(
+                    original[parameter][band],
+                    rel=1e-5,
+                    abs=1e-5,
+                )
+
+    def test_parameters_t30_decay_comparison(self):
+        """Un decaimiento mas lento debe producir un T30 mayor."""
+        fs = 44100
+
+        ir_short = _exponential_ir(0.5, fs, 1.5)
+        ir_long = _exponential_ir(1.0, fs, 3.0)
+
+        params_short = calculate_parameters_from_ir(ir_short, fs)
+        params_long = calculate_parameters_from_ir(ir_long, fs)
+
+        t30_short = params_short["T30"][1000]
+        t30_long = params_long["T30"][1000]
+
+        assert t30_long > t30_short
+        assert t30_long / t30_short == pytest.approx(2.0, rel=0.25)
