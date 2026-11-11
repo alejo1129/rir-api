@@ -66,7 +66,32 @@ def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
     .. [1] Schroeder, M. R. (1965). "New method of measuring reverberation
        time." JASA 37(3), 409-412.
     """
-    raise NotImplementedError("Implementar en Milestone 3")
+
+    ir = np.asarray(ir, dtype=np.float64)
+
+    if ir.ndim != 1 or ir.size == 0:
+        raise ValueError("La respuesta al impulso debe ser un array 1D no vacio")
+
+    if not np.all(np.isfinite(ir)):
+        raise ValueError("La respuesta al impulso debe contener valores finitos")
+
+    peak = np.max(np.abs(ir))
+
+    if peak == 0:
+        raise ValueError("No se puede normalizar una respuesta al impulso nula")
+
+    # Normalizar para evitar desbordamientos al calcular la energia.
+    normalized_ir = ir / peak
+
+    # Integracion inversa de la energia.
+    energy = normalized_ir**2
+    edc = np.cumsum(energy[::-1])[::-1]
+
+    # Normalizar la energia y convertirla a decibeles.
+    with np.errstate(divide="ignore"):
+        edc_db = 10.0 * np.log10(edc / edc[0])
+
+    return edc_db
 
 
 def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float]:
