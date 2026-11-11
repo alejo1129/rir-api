@@ -1,7 +1,6 @@
 import io
 
 import numpy as np
-import pytest
 import soundfile as sf
 from fastapi.testclient import TestClient
 
@@ -9,8 +8,6 @@ from app.main import app
 from app.routers.audio_http import wav_response
 
 client = TestClient(app)
-
-xfail_m3 = pytest.mark.xfail(strict=False, reason="se implementa en M3")
 
 
 def _wav_en_memoria(signal: np.ndarray, fs: int) -> bytes:
@@ -54,7 +51,7 @@ def test_wav_response_roundtrip():
     assert np.allclose(leida, senal, atol=1e-6)
 
 
-# M1 - Endpoints (Ya sin xfail porque están andando perfecto)
+# M1 - Endpoints
 
 
 def test_signals_pink_noise_endpoint():
@@ -98,7 +95,6 @@ def test_signals_synthetic_ir_endpoint():
     assert len(senal) == 44100
 
 
-# @xfail_m2
 def test_filters_single_band_endpoint():
     fs = 44100
     ruido = np.random.default_rng(1).standard_normal(fs) * 0.5
@@ -112,7 +108,6 @@ def test_filters_single_band_endpoint():
     assert len(filtrada) == fs
 
 
-# @xfail_m2
 def test_invalid_file_returns_422():
     archivos = {"file": ("no_es_audio.wav", b"esto no es audio", "audio/wav")}
     response = client.post(
@@ -124,7 +119,6 @@ def test_invalid_file_returns_422():
 # M3
 
 
-@xfail_m3
 def test_acoustics_parameters_endpoint():
     fs = 44100
     archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
@@ -133,7 +127,6 @@ def test_acoustics_parameters_endpoint():
     assert isinstance(response.json(), dict)
 
 
-@xfail_m3
 def test_utils_schroeder_endpoint():
     fs = 44100
     archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
@@ -142,7 +135,6 @@ def test_utils_schroeder_endpoint():
     assert isinstance(response.json(), dict)
 
 
-@xfail_m3
 def test_utils_smoothing_endpoint():
     fs = 44100
     archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}

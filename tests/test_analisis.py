@@ -14,10 +14,6 @@ from app.services.acoustic_parameters import (
     linear_regression,
 )
 
-pytestmark = pytest.mark.xfail(
-    raises=NotImplementedError, strict=False, reason="se implementa en M3"
-)
-
 
 def _exponential_ir(t60: float, fs: int, duration: float, seed: int = 0) -> np.ndarray:
     """RI sintetica de banda ancha: ruido blanco con decaimiento exponencial."""
