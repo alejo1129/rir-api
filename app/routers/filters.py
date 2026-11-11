@@ -17,8 +17,7 @@ async def single_band_filter(
     try:
         with uploaded_file(file) as path:
             signal, fs = load_audio(path)
+        filtered = filter_single_band(signal, fs, center_freq)
     except ValueError as err:
         raise HTTPException(status_code=422, detail=str(err)) from err
-
-    filtered = filter_single_band(signal, fs, center_freq)
     return wav_response(filtered, fs, "filtered.wav")
