@@ -332,13 +332,17 @@ La respuesta presenta una ganancia máxima en la frecuencia central, una atenuac
 
 4. Resultado de las pruebas automatizadas
 
-La ejecución de uv run pytest -v obtuvo:
+La suite completa de pruebas se mantiene en verde.
 
-36 tests aprobados.
+Estado verificado:
 
-15 tests marcados como XFAIL, correspondientes a funcionalidades previstas para M3.
+- 67 tests aprobados.
+- 0 tests fallidos.
+- 0 XFAIL pendientes correspondientes a M0, M1 o M2.
 
-0 tests fallidos.
+El estado actualizado puede verificarse ejecutando:
+
+uv run pytest -v
 
 Las evidencias detalladas y la metodología de validación se encuentran en docs/m2/evidencia.md.
 
@@ -353,6 +357,9 @@ Las evidencias detalladas y la metodología de validación se encuentran en docs
 - [ ] (Opcional) `apply_lundeby()`.
 
 ## Tests
+
+En el estado actual del proyecto, los tests correspondientes a M0, M1 y M2 ya se encuentran activos y aprobados. Las marcas `xfail` solo deben mantenerse para funcionalidades futuras que todavía no estén implementadas.
+
 
 Las funciones de `app/services/` vienen como *stubs* que lanzan `NotImplementedError`. Sus
 tests estan marcados como `xfail` (fallo esperado), asi el CI queda en verde desde el
