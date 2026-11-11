@@ -94,6 +94,27 @@ class TestApplySchroederIntegral:
         slope = np.polyfit(t[tramo], edc[tramo], 1)[0]
         assert abs(slope - (-60 / t60)) <= 0.1 * (60 / t60)
 
+    def test_schroeder_known_energy_curve(self):
+        """Verifica la integral de Schroeder con valores conocidos."""
+        ir = np.array([1.0, 2.0, 3.0])
+
+        expected_energy = np.array([14.0, 13.0, 9.0])
+        expected_db = 10 * np.log10(expected_energy / expected_energy[0])
+
+        result = apply_schroeder_integral(ir)
+
+        np.testing.assert_allclose(result, expected_db, atol=1e-10)
+
+    def test_schroeder_amplitude_invariance(self):
+        """La EDC normalizada es independiente de la amplitud de la Respuesta al Impulso."""
+        ir = np.array([1.0, 2.0, 3.0])
+        scaled_ir = 5.0 * ir
+
+        original = apply_schroeder_integral(ir)
+        scaled = apply_schroeder_integral(scaled_ir)
+
+        np.testing.assert_allclose(original, scaled, atol=1e-10)
+
 
 # --------------------------------------------------------------------------- #
 # Regresion lineal
