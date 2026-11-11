@@ -4,20 +4,17 @@ Milestone 3: Producto final.
 """
 
 import numpy as np
+from scipy import signal as sps
+
+from app.services.filter import filter_single_band
+
+OCTAVE_BANDS = (125, 250, 500, 1000, 2000, 4000, 8000)
 
 
 def apply_smoothing(
     signal: np.ndarray, fs: int, method: str = "hilbert", window_ms: float = 10
 ) -> np.ndarray:
     """Suaviza una senal y devuelve su envolvente en **amplitud**.
-
-    - ``method='hilbert'`` (recomendado): envolvente de Hilbert,
-      ``np.abs(scipy.signal.hilbert(signal))``. Ignora ``window_ms``.
-    - ``method='moving_average'``: media movil de ``window_ms`` milisegundos
-      (``int(window_ms * fs / 1000)`` muestras, al menos 1). Para que la salida
-      quede en amplitud (comparable con Hilbert), devolver la raiz de la media
-      movil de ``signal**2`` (envolvente RMS) o, alternativamente, la media
-      movil de ``|signal|``. Documentar cual se eligio.
 
     Parameters
     ----------
@@ -41,7 +38,22 @@ def apply_smoothing(
         Si ``method`` no es ``'hilbert'`` ni ``'moving_average'``, o si
         ``window_ms`` no es positivo.
     """
-    raise NotImplementedError("Implementar en Milestone 3")
+    sig = np.asarray(signal, dtype=np.float64)
+
+    if method == "hilbert":
+        analytic_signal = sps.hilbert(sig)
+        return np.abs(analytic_signal).astype(np.float64)
+
+    if method == "moving_average":
+        if window_ms <= 0:
+            raise ValueError("window_ms debe ser mayor que cero.")
+        win_len = max(1, int(window_ms * fs / 1000.0))
+        kernel = np.ones(win_len, dtype=np.float64) / win_len
+        # Envolvente RMS mediante la raiz de la media movil de signal**2
+        mean_sq = np.convolve(sig**2, kernel, mode="same")
+        return np.sqrt(np.maximum(mean_sq, 0.0)).astype(np.float64)
+
+    raise ValueError(f"Metodo no soportado: {method}. Use 'hilbert' o 'moving_average'.")
 
 
 def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
@@ -66,7 +78,6 @@ def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
     .. [1] Schroeder, M. R. (1965). "New method of measuring reverberation
        time." JASA 37(3), 409-412.
     """
-
     ir = np.asarray(ir, dtype=np.float64)
 
     if ir.ndim != 1 or ir.size == 0:
@@ -97,9 +108,6 @@ def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
 def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float]:
     """Calcula la regresion lineal por minimos cuadrados.
 
-    Se recomienda implementarla a mano (formulas de minimos cuadrados) en lugar
-    de ``np.polyfit``, para demostrar comprension del metodo.
-
     Parameters
     ----------
     x : np.ndarray
@@ -116,7 +124,44 @@ def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float
     r2 : float
         Coeficiente de determinacion R^2.
     """
-    raise NotImplementedError("Implementar en Milestone 3")
+    x_arr = np.asarray(x, dtype=np.float64)
+    y_arr = np.asarray(y, dtype=np.float64)
+
+    x_mean = float(np.mean(x_arr))
+    y_mean = float(np.mean(y_arr))
+
+    dx = x_arr - x_mean
+    dy = y_arr - y_mean
+
+    ss_xx = float(np.sum(dx * dx))
+    ss_yy = float(np.sum(dy * dy))
+    ss_xy = float(np.sum(dx * dy))
+
+    if ss_xx == 0.0:
+        raise ValueError("La varianza de x es cero; no se puede ajustar una recta.")
+
+    slope = ss_xy / ss_xx
+    intercept = y_mean - slope * x_mean
+
+    if ss_yy == 0.0:
+        r2 = 1.0
+    else:
+        y_pred = slope * x_arr + intercept
+        ss_res = float(np.sum((y_arr - y_pred) ** 2))
+        r2 = max(0.0, 1.0 - (ss_res / ss_yy))
+
+    return float(slope), float(intercept), float(r2)
+
+
+def _decay_time(t: np.ndarray, edc_db: np.ndarray, db_start: float, db_end: float) -> float:
+    """Estima el tiempo de reverberacion extrapolado a 60 dB en el rango [db_start, db_end]."""
+    mask = np.isfinite(edc_db) & (edc_db <= db_start) & (edc_db >= db_end)
+    if np.count_nonzero(mask) < 2:
+        return 0.0
+    slope, _, _ = linear_regression(t[mask], edc_db[mask])
+    if slope >= 0:
+        return 0.0
+    return float(-60.0 / slope)
 
 
 def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[float, float]]:
@@ -136,41 +181,53 @@ def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[floa
     -------
     dict[str, dict[float, float]]
         ``{parametro: {frecuencia_central: valor}}``.
-        Ejemplo: ``{'T30': {125: 1.5, 250: 1.3, ...}, 'EDT': {...}, 'D50': {...},
-        'C80': {...}}``.
-
-    References
-    ----------
-    .. [1] ISO 3382-1:2009. "Acoustics -- Measurement of room acoustic
-       parameters -- Part 1: Performance spaces."
     """
-    raise NotImplementedError("Implementar en Milestone 3")
+    sig = np.asarray(ir, dtype=np.float64)
+    t = np.arange(len(sig), dtype=np.float64) / fs
+
+    results: dict[str, dict[float, float]] = {
+        "EDT": {},
+        "T10": {},
+        "T20": {},
+        "T30": {},
+        "D50": {},
+        "C80": {},
+    }
+
+    idx_50ms = min(len(sig), int(0.050 * fs))
+    idx_80ms = min(len(sig), int(0.080 * fs))
+
+    for fc in OCTAVE_BANDS:
+        if fc * np.sqrt(2.0) >= fs / 2.0:
+            continue
+
+        band_ir = filter_single_band(sig, fs, float(fc))
+        edc = apply_schroeder_integral(band_ir)
+
+        results["EDT"][fc] = _decay_time(t, edc, 0.0, -10.0)
+        results["T10"][fc] = _decay_time(t, edc, -5.0, -15.0)
+        results["T20"][fc] = _decay_time(t, edc, -5.0, -25.0)
+        results["T30"][fc] = _decay_time(t, edc, -5.0, -35.0)
+
+        sq = band_ir**2
+        total_energy = float(np.sum(sq))
+        if total_energy > 0:
+            early_50 = float(np.sum(sq[:idx_50ms]))
+            d50 = (early_50 / total_energy) * 100.0
+
+            early_80 = float(np.sum(sq[:idx_80ms]))
+            late_80 = max(float(np.sum(sq[idx_80ms:])), 1e-12)
+            c80 = 10.0 * np.log10(max(early_80, 1e-12) / late_80)
+        else:
+            d50 = 0.0
+            c80 = 0.0
+
+        results["D50"][fc] = float(d50)
+        results["C80"][fc] = float(c80)
+
+    return results
 
 
 def apply_lundeby(ir: np.ndarray, fs: int) -> tuple[int, float]:
-    """Estima el punto de truncamiento de la RI (metodo de Lundeby).
-
-    Parameters
-    ----------
-    ir : np.ndarray
-        Respuesta al impulso (array 1D).
-    fs : int
-        Frecuencia de muestreo en Hz.
-
-    Returns
-    -------
-    index : int
-        Indice de la muestra donde la RI se cruza con el ruido de fondo.
-    noise_level_db : float
-        Nivel estimado del ruido de fondo en dB.
-
-    Notes
-    -----
-    Esta funcion es **opcional** (extra).
-
-    References
-    ----------
-    .. [1] Lundeby, A. et al. (1995). "Uncertainties of measurements in
-       room acoustics." Acustica 81(4), 344-355.
-    """
+    """Estima el punto de truncamiento de la RI (metodo de Lundeby)."""
     raise NotImplementedError("Implementar en Milestone 3 (opcional)")
