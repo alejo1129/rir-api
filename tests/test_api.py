@@ -131,10 +131,50 @@ def test_invalid_file_returns_422():
 
 def test_acoustics_parameters_endpoint():
     fs = 44100
-    archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
+    ir = _ri_sintetica(fs)
+    archivos = {"file": ("ir.wav", _wav_en_memoria(ir, fs), "audio/wav")}
+
     response = client.post("/api/v1/acoustics/parameters", files=archivos)
+
     assert response.status_code == 200
-    assert isinstance(response.json(), dict)
+    data = response.json()
+
+    assert set(data) == {
+        "sample_rate",
+        "duration",
+        "center_frequencies",
+        "parameters",
+    }
+    assert data["sample_rate"] == fs
+    assert abs(data["duration"] - len(ir) / fs) < 1e-9
+    assert isinstance(data["center_frequencies"], list)
+    assert len(data["center_frequencies"]) > 0
+
+    for parameter in ("EDT", "T10", "T20", "T30", "D50", "C80"):
+        assert parameter in data["parameters"]
+
+
+def test_acoustics_parameters_serializes_none_as_null():
+    fs = 44100
+    t = np.arange(fs) / fs
+    ir = 0.9 * np.sin(2 * np.pi * 1000 * t)
+    archivos = {"file": ("ir.wav", _wav_en_memoria(ir, fs), "audio/wav")}
+
+    response = client.post("/api/v1/acoustics/parameters", files=archivos)
+
+    assert response.status_code == 200
+    edt = response.json()["parameters"]["EDT"]
+    assert any(value is None for value in edt.values())
+
+
+def test_acoustics_parameters_openapi_response_model():
+    openapi = client.get("/openapi.json").json()
+
+    response_schema = openapi["paths"]["/api/v1/acoustics/parameters"]["post"]["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
+
+    assert response_schema["$ref"].endswith("/BandAnalysisResponse")
 
 
 def test_utils_schroeder_endpoint():
