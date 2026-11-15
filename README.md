@@ -31,14 +31,14 @@ ISO 3382-1.
 
 Para ejecutar el proyecto localmente, primero se debe clonar el repositorio:
 
-```bash
+```bat
 git clone https://github.com/alejo1129/rir-api.git
 cd rir-api
 ```
 
 Luego se instalan las dependencias del proyecto:
 
-```bash
+```bat
 uv sync
 ```
 
@@ -230,6 +230,29 @@ Para organizarnos mejor durante el proyecto vamos a trabajar de la siguiente man
       con sus schemas en `app/schemas/signals.py`.
 - [x] Tests de `tests/test_generacion.py` y los de M1 en `tests/test_api.py` pasando;
       graficas de validacion en [`docs/m1/evidencia.md`](docs/m1/evidencia.md).
+
+
+#### Ejemplos de uso desde terminal
+
+Generación de ruido rosa:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/signals/pink-noise" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"duration\":5,\"sample_rate\":44100}" ^
+  -o pink_noise.wav
+```
+
+Generación de sine sweep:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/signals/sine-sweep" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"duration\":5,\"start_freq\":20,\"end_freq\":20000,\"sample_rate\":44100,\"inverse\":false}" ^
+  -o sine_sweep.wav
+```
+
+Para obtener el filtro inverso del sweep, se utiliza el mismo endpoint cambiando `"inverse":false` por `"inverse":true`.
 
 ### M2 · Procesamiento de la RI (`v0.2.0`)
 
