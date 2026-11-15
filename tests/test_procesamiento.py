@@ -146,6 +146,32 @@ def test_impulse_response_peak():
     assert correlacion > 0.9, f"correlacion = {correlacion:.3f}"
 
 
+def test_impulse_response_preserves_pretrigger():
+    """La RI conserva aproximadamente 5 ms de senal antes del pico principal."""
+    pre_trigger_samples = 240
+
+    recording = np.zeros(1000, dtype=np.float64)
+    recording[500] = 1.0
+    inverse_filter = np.array([1.0], dtype=np.float64)
+
+    ir_rec = get_impulse_response(recording, inverse_filter)
+
+    peak_idx = int(np.argmax(np.abs(ir_rec)))
+    assert peak_idx == pre_trigger_samples
+
+
+def test_impulse_response_pretrigger_near_start():
+    """El pre-trigger no produce indices negativos si el pico esta al comienzo."""
+    recording = np.zeros(100, dtype=np.float64)
+    recording[2] = 1.0
+    inverse_filter = np.array([1.0], dtype=np.float64)
+
+    ir_rec = get_impulse_response(recording, inverse_filter)
+
+    assert int(np.argmax(np.abs(ir_rec))) == 2
+    assert len(ir_rec) == len(recording)
+
+
 # --------------------------------------------------------------------------- #
 # Filtro de octava
 # --------------------------------------------------------------------------- #

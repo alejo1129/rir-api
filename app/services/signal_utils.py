@@ -125,8 +125,8 @@ def get_impulse_response(recording: np.ndarray, inverse_filter: np.ndarray) -> n
     Returns
     -------
     np.ndarray
-        Respuesta al impulso normalizada entre -1 y 1 y recortada desde
-        el pico principal.
+        Respuesta al impulso normalizada entre -1 y 1 y recortada
+        aproximadamente 5 ms antes del pico principal.
     """
 
     rec = np.asarray(recording, dtype=np.float64)
@@ -137,7 +137,13 @@ def get_impulse_response(recording: np.ndarray, inverse_filter: np.ndarray) -> n
 
     raw_ir = sps.fftconvolve(rec, inv, mode="full")
     peak_idx = int(np.argmax(np.abs(raw_ir)))
-    trimmed_ir = raw_ir[peak_idx:]
+
+    # Conservamos aproximadamente 5 ms antes del sonido directo.
+    # La firma no recibe fs: 240 muestras son 5 ms a 48 kHz
+    # y aproximadamente 5.4 ms a 44.1 kHz.
+    pre_trigger_samples = 240
+    start_idx = max(0, peak_idx - pre_trigger_samples)
+    trimmed_ir = raw_ir[start_idx:]
 
     max_val = np.max(np.abs(trimmed_ir))
     if max_val > 0:
