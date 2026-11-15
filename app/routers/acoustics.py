@@ -17,10 +17,10 @@ async def acoustic_parameters(
     try:
         with uploaded_file(file) as path:
             ir, fs = load_audio(path)
+
+        params = calculate_parameters_from_ir(ir, fs)
     except ValueError as err:
         raise HTTPException(status_code=422, detail=str(err)) from err
-
-    params = calculate_parameters_from_ir(ir, fs)
 
     return BandAnalysisResponse(
         sample_rate=fs,
