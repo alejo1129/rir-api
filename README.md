@@ -99,28 +99,28 @@ RH -->|"JSON"| C
 
 C -->|"datos JSON"| RS
 RS -->|"valida request"| SS
-RS --> PN
-RS --> SW
-RS --> SIG
+RS -->|"generate_pink_noise"| PN
+RS -->|"generate_sine_sweep_pair"| SW
+RS -->|"generate_synthetic_ir"| SIG
 RS -->|"wav_response"| RAH
 RS -->|"WAV"| C
 
 C -->|"WAV + parámetros"| RF
 RF -->|"uploaded_file / wav_response"| RAH
 RF -->|"load_audio"| SIG
-RF --> FIL
+RF -->|"filter_single_band"| FIL
 RF -->|"WAV"| C
 
 C -->|"datos JSON"| RU
 RU -->|"valida request"| SU
-RU --> AC
+RU -->|"apply_smoothing / apply_schroeder_integral"| AC
 RU -->|"JSON"| C
 
 C -->|"RI en WAV"| RA
 RA -->|"uploaded_file"| RAH
 RA -->|"load_audio"| SIG
-RA --> FIL
-RA --> AC
+RA -->|"filter_single_band (interno)"| FIL
+RA -->|"calculate_parameters_from_ir"| AC
 RA -->|"response_model"| SR
 RA -->|"JSON: EDT, T20, T30, D50, C80"| C
 
