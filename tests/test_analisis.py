@@ -243,3 +243,20 @@ class TestCalculateParametersFromIR:
 
         assert t30_long > t30_short
         assert t30_long / t30_short == pytest.approx(2.0, rel=0.25)
+
+    def test_insufficient_dynamic_range_returns_none(self):
+        """Sin rango dinamico suficiente, los tiempos de reverberacion son None."""
+        fs = 44100
+        t = np.arange(fs) / fs
+
+        # Un seno estacionario no presenta una caida reverberante:
+        # el nivel del ultimo 10 % es cercano al nivel maximo.
+        ir = np.sin(2 * np.pi * 1000 * t)
+
+        params = calculate_parameters_from_ir(ir, fs)
+
+        for parameter in ("EDT", "T10", "T20", "T30"):
+            assert params[parameter][1000] is None
+
+        assert isinstance(params["D50"][1000], float)
+        assert isinstance(params["C80"][1000], float)

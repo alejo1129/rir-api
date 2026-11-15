@@ -153,18 +153,48 @@ def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float
     return float(slope), float(intercept), float(r2)
 
 
-def _decay_time(t: np.ndarray, edc_db: np.ndarray, db_start: float, db_end: float) -> float:
-    """Estima el tiempo de reverberacion extrapolado a 60 dB en el rango [db_start, db_end]."""
+def _estimate_dynamic_range_db(signal: np.ndarray) -> float:
+    """Estima el rango dinamico usando el ultimo 10 % como ruido de fondo."""
+    sig = np.asarray(signal, dtype=np.float64)
+    power = sig**2
+
+    peak_power = float(np.max(power))
+    if peak_power <= 0.0:
+        return 0.0
+
+    tail_len = max(1, int(np.ceil(0.1 * power.size)))
+    noise_power = float(np.mean(power[-tail_len:]))
+
+    if noise_power <= 0.0:
+        return float("inf")
+
+    return float(10.0 * np.log10(peak_power / noise_power))
+
+
+def _decay_time(
+    t: np.ndarray,
+    edc_db: np.ndarray,
+    db_start: float,
+    db_end: float,
+    dynamic_range_db: float,
+) -> float | None:
+    """Estima el tiempo de reverberacion si hay rango dinamico suficiente."""
+    required_dynamic_range_db = abs(db_end) + 10.0
+    if dynamic_range_db < required_dynamic_range_db:
+        return None
+
     mask = np.isfinite(edc_db) & (edc_db <= db_start) & (edc_db >= db_end)
     if np.count_nonzero(mask) < 2:
-        return 0.0
+        return None
+
     slope, _, _ = linear_regression(t[mask], edc_db[mask])
     if slope >= 0:
-        return 0.0
+        return None
+
     return float(-60.0 / slope)
 
 
-def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[float, float]]:
+def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[float, float | None]]:
     """Calcula los parametros acusticos ISO 3382 por banda de octava.
 
     Parametros: EDT (0 a -10 dB), T10 (-5 a -15 dB), T20 (-5 a -25 dB),
@@ -179,13 +209,14 @@ def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[floa
 
     Returns
     -------
-    dict[str, dict[float, float]]
-        ``{parametro: {frecuencia_central: valor}}``.
+    dict[str, dict[float, float | None]]
+        ``{parametro: {frecuencia_central: valor}}``. Un tiempo sin rango
+        dinamico suficiente para su tramo vale ``None``.
     """
     sig = np.asarray(ir, dtype=np.float64)
     t = np.arange(len(sig), dtype=np.float64) / fs
 
-    results: dict[str, dict[float, float]] = {
+    results: dict[str, dict[float, float | None]] = {
         "EDT": {},
         "T10": {},
         "T20": {},
@@ -203,11 +234,12 @@ def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[floa
 
         band_ir = filter_single_band(sig, fs, float(fc))
         edc = apply_schroeder_integral(band_ir)
+        dynamic_range_db = _estimate_dynamic_range_db(band_ir)
 
-        results["EDT"][fc] = _decay_time(t, edc, 0.0, -10.0)
-        results["T10"][fc] = _decay_time(t, edc, -5.0, -15.0)
-        results["T20"][fc] = _decay_time(t, edc, -5.0, -25.0)
-        results["T30"][fc] = _decay_time(t, edc, -5.0, -35.0)
+        results["EDT"][fc] = _decay_time(t, edc, 0.0, -10.0, dynamic_range_db)
+        results["T10"][fc] = _decay_time(t, edc, -5.0, -15.0, dynamic_range_db)
+        results["T20"][fc] = _decay_time(t, edc, -5.0, -25.0, dynamic_range_db)
+        results["T30"][fc] = _decay_time(t, edc, -5.0, -35.0, dynamic_range_db)
 
         sq = band_ir**2
         total_energy = float(np.sum(sq))
