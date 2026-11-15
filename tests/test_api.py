@@ -191,3 +191,23 @@ def test_utils_smoothing_endpoint():
     response = client.post("/api/v1/utils/smoothing", files=archivos)
     assert response.status_code == 200
     assert isinstance(response.json(), dict)
+
+
+def test_acoustics_parameters_silent_ir_returns_422():
+    fs = 44100
+    ir = np.zeros(fs, dtype=np.float64)
+    archivos = {"file": ("silencio.wav", _wav_en_memoria(ir, fs), "audio/wav")}
+
+    response = client.post("/api/v1/acoustics/parameters", files=archivos)
+
+    assert response.status_code == 422
+    assert "respuesta al impulso nula" in response.json()["detail"].lower()
+
+
+def test_acoustics_parameters_invalid_file_returns_422():
+    archivos = {"file": ("no_es_audio.wav", b"esto no es audio", "audio/wav")}
+
+    response = client.post("/api/v1/acoustics/parameters", files=archivos)
+
+    assert response.status_code == 422
+    assert "detail" in response.json()
