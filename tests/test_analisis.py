@@ -244,6 +244,34 @@ class TestCalculateParametersFromIR:
         assert t30_long > t30_short
         assert t30_long / t30_short == pytest.approx(2.0, rel=0.25)
 
+    def test_d50_c80_start_at_direct_sound_peak(self, monkeypatch):
+        """D50 y C80 deben contar desde el pico de la banda filtrada."""
+        fs = 1000
+        ir = np.zeros(fs, dtype=np.float64)
+
+        # Energia previa al sonido directo: no debe entrar en D50 ni C80.
+        ir[0] = 9.0
+
+        # Sonido directo: maximo de la banda, define n0.
+        ir[100] = 10.0
+
+        # Energia tardia, posterior a 80 ms desde n0.
+        ir[200] = 1.0
+
+        monkeypatch.setattr(
+            "app.services.acoustic_parameters.filter_single_band",
+            lambda signal, fs, center_freq: np.asarray(signal, dtype=np.float64),
+        )
+
+        params = calculate_parameters_from_ir(ir, fs)
+
+        expected_total_energy = 10.0**2 + 1.0**2
+        expected_d50 = 10.0**2 / expected_total_energy * 100.0
+        expected_c80 = 10.0 * np.log10(10.0**2 / 1.0**2)
+
+        assert params["D50"][125] == pytest.approx(expected_d50, rel=1e-6)
+        assert params["C80"][125] == pytest.approx(expected_c80, rel=1e-6)
+
     def test_insufficient_dynamic_range_returns_none(self):
         """Sin rango dinamico suficiente, los tiempos de reverberacion son None."""
         fs = 44100
