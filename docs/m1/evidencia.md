@@ -51,31 +51,48 @@ Los tests automáticos de M1 requieren una relación mínima de **60 dB**, por l
 
 ## 4. Validación real de reproducción y grabación
 
-La función `play_and_record()` también fue validada utilizando hardware de audio real.
+La función `play_and_record()` fue validada utilizando hardware de audio real y un sine sweep logarítmico reproducido y grabado mediante una interfaz Focusrite.
 
-Equipamiento utilizado:
+### Configuración de audio
 
-- Interfaz de audio: **Focusrite**
-- Entrada: **Focusrite Analogue 1 + 2**
-- Salida: **Focusrite Altavoces**
+- Interfaz de audio: **Focusrite USB Audio**
+- Entrada: **Analogue 1 + 2 (Focusrite)**, utilizando el **canal 1**
+- Salida: **Altavoces (Focusrite)**, utilizando **2 canales**
 - Frecuencia de muestreo: **48.000 Hz**
+- Blocksize: **0 (automático / PortAudio)**
+- Pre-roll: **0,5 s**
 
-Prueba realizada:
+### Señal utilizada
 
-- Duración de la señal reproducida: **0,5 s**
-- Duración solicitada de grabación: **1,5 s**
-- Muestras grabadas: **72.000**
-- Valor máximo registrado: **0,0030517578125**
-- RMS registrado: **0,000604360131546855**
+- Tipo: **sine sweep logarítmico**
+- Frecuencia inicial: **20 Hz**
+- Frecuencia final: **20.000 Hz**
+- Duración del sweep: **5 s**
+- Nivel digital aplicado al sweep: **0,1**
+- Duración total de grabación: **7 s**
 
-La prueba confirmó que la función puede reproducir una señal mediante la interfaz física y mantener la grabación durante un tiempo superior al de la señal reproducida.
+### Resultado
+
+- Muestras grabadas: **336.000**
+- Pico registrado: **0,500061035**
+- Pico registrado: **-6,02 dBFS**
+- RMS registrado: **0,074422577**
+- RMS registrado: **-22,57 dBFS**
+- Muestras con clipping: **0**
+
+La señal grabada presenta un nivel claramente útil y mantiene margen respecto del clipping. La medición confirma el funcionamiento real de `play_and_record()` utilizando la interfaz física, incluyendo el pre-roll de 0,5 s agregado antes de la reproducción.
 
 ![Validación real de play_and_record](qa_play_and_record_real.png)
 
-Los resultados numéricos de esta prueba se encuentran también en:
+Los resultados numéricos de esta prueba se encuentran en:
 
 - `docs/m1/qa_play_and_record_real.txt`
-- `docs/m1/qa_validacion_final_m1.txt`
+
+La prueba puede repetirse mediante:
+
+```bash
+uv run python -m scripts.qa_play_and_record_real
+```
 
 ---
 
