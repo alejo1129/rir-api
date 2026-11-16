@@ -159,7 +159,7 @@ def test_play_and_record_shape(monkeypatch):
 
 
 def test_play_and_record_padding(monkeypatch):
-    """Completa con ceros la reproduccion hasta record_duration."""
+    """Agrega pre-roll y completa con ceros hasta record_duration."""
     fs = 1000
     record_duration = 2.0
     esperado = int(record_duration * fs)
@@ -167,13 +167,15 @@ def test_play_and_record_padding(monkeypatch):
     sd_falso = _sounddevice_falso()
     monkeypatch.setitem(sys.modules, "sounddevice", sd_falso)
 
-    # Señal de 1 segundo con valor 1.
+    # Senal de 1 segundo con valor 1.
     senal = np.ones(fs)
 
     play_and_record(senal, fs, record_duration)
 
     enviado = sd_falso.ultimo_playrec
+    pre_roll = int(0.5 * fs)
 
     assert enviado.shape[0] == esperado
-    assert np.all(enviado[:fs] == 1)
-    assert np.all(enviado[fs:] == 0)
+    assert np.all(enviado[:pre_roll] == 0)
+    assert np.all(enviado[pre_roll : pre_roll + fs] == 1)
+    assert np.all(enviado[pre_roll + fs :] == 0)
