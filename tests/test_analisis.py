@@ -288,3 +288,23 @@ class TestCalculateParametersFromIR:
 
         assert isinstance(params["D50"][1000], float)
         assert isinstance(params["C80"][1000], float)
+
+    def test_parameters_ignore_excess_leading_silence(self, monkeypatch):
+        """El pre-delay extra antes del directo no debe alterar los parámetros."""
+        fs = 1000
+
+        ir = np.zeros(fs, dtype=np.float64)
+        ir[5] = 1.0
+        ir[6:] = np.exp(-np.arange(1, fs - 5) / 100.0)
+
+        ir_with_leading_silence = np.concatenate([np.zeros(100, dtype=np.float64), ir])
+
+        monkeypatch.setattr(
+            "app.services.acoustic_parameters.filter_single_band",
+            lambda signal, fs, center_freq: np.asarray(signal, dtype=np.float64),
+        )
+
+        reference = calculate_parameters_from_ir(ir, fs)
+        result = calculate_parameters_from_ir(ir_with_leading_silence, fs)
+
+        assert result["EDT"][125] == pytest.approx(reference["EDT"][125], rel=1e-6)
