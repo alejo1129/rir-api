@@ -217,6 +217,10 @@ def calculate_parameters_from_ir(
         dinamico suficiente para su tramo vale ``None``.
     """
     sig = np.asarray(ir, dtype=np.float64)
+    peak_idx = int(np.argmax(np.abs(sig)))
+    pretrigger_samples = int(0.005 * fs)
+    start_idx = max(0, peak_idx - pretrigger_samples)
+    sig = sig[start_idx:]
     t = np.arange(len(sig), dtype=np.float64) / fs
 
     results: dict[str, dict[float, float | None]] = {
