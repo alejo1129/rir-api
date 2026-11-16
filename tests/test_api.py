@@ -179,18 +179,99 @@ def test_acoustics_parameters_openapi_response_model():
 
 def test_utils_schroeder_endpoint():
     fs = 44100
-    archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
+    ir = _ri_sintetica(fs)
+    archivos = {"file": ("ir.wav", _wav_en_memoria(ir, fs), "audio/wav")}
+
     response = client.post("/api/v1/utils/schroeder", files=archivos)
+
     assert response.status_code == 200
-    assert isinstance(response.json(), dict)
+    data = response.json()
+
+    assert set(data) == {
+        "sample_rate",
+        "num_samples",
+        "lundeby_applied",
+        "time_step",
+        "edc_db",
+    }
+    assert data["sample_rate"] == fs
+    assert data["num_samples"] == len(ir)
+    assert data["lundeby_applied"] is False
+    assert data["time_step"] > 0
+    assert isinstance(data["edc_db"], list)
+    assert len(data["edc_db"]) < len(ir)
+    assert all(np.isfinite(value) for value in data["edc_db"])
 
 
 def test_utils_smoothing_endpoint():
     fs = 44100
-    archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
+    ir = _ri_sintetica(fs)
+    archivos = {"file": ("ir.wav", _wav_en_memoria(ir, fs), "audio/wav")}
+
     response = client.post("/api/v1/utils/smoothing", files=archivos)
+
     assert response.status_code == 200
-    assert isinstance(response.json(), dict)
+    data = response.json()
+
+    assert set(data) == {
+        "method",
+        "window_ms",
+        "sample_rate",
+        "time_step",
+        "envelope",
+    }
+    assert data["method"] == "hilbert"
+    assert data["window_ms"] == 10.0
+    assert data["sample_rate"] == fs
+    assert data["time_step"] > 0
+    assert isinstance(data["envelope"], list)
+    assert len(data["envelope"]) < len(ir)
+
+
+def test_utils_smoothing_invalid_method_returns_422():
+    fs = 44100
+    archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
+
+    response = client.post(
+        "/api/v1/utils/smoothing",
+        files=archivos,
+        data={"method": "invalid"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_utils_smoothing_window_above_limit_returns_422():
+    fs = 44100
+    archivos = {"file": ("ir.wav", _wav_en_memoria(_ri_sintetica(fs), fs), "audio/wav")}
+
+    response = client.post(
+        "/api/v1/utils/smoothing",
+        files=archivos,
+        data={"window_ms": 101},
+    )
+
+    assert response.status_code == 422
+
+
+def test_utils_smoothing_openapi_response_model():
+    openapi = client.get("/openapi.json").json()
+
+    response_schema = openapi["paths"]["/api/v1/utils/smoothing"]["post"]["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
+
+    assert response_schema["$ref"].endswith("/SmoothingResponse")
+
+
+def test_utils_schroeder_openapi_response_model():
+    openapi = client.get("/openapi.json").json()
+
+    response_schema = openapi["paths"]["/api/v1/utils/schroeder"]["post"]["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
+
+    assert response_schema["$ref"].endswith("/SchroederResponse")
 
 
 def test_acoustics_parameters_silent_ir_returns_422():
