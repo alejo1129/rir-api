@@ -403,9 +403,16 @@ uv run pytest -rxX                             # listar xfailed / xpassed
 uv run pytest --cov=app                        # con cobertura
 ```
 
-`play_and_record` se testea con un *mock* de `sounddevice`, por lo que el CI no necesita
-placa de audio. Para probarla de verdad, corran la funcion localmente con un parlante y un
-microfono y documenten la configuracion (dispositivo, canales, fs, buffer size).
+`play_and_record()` se testea automáticamente con un *mock* de `sounddevice`, por lo que
+el CI no requiere hardware de audio. Además, se realizó una validación con hardware real
+utilizando una interfaz Focusrite: entrada Analogue 1 + 2 por el canal 1, salida Altavoces
+por 2 canales, `fs = 48000 Hz`, `blocksize = 0` (automático / PortAudio) y un pre-roll de
+0,5 s.
+
+La prueba utilizó un sine sweep logarítmico de 20 Hz a 20 kHz durante 5 s. La grabación
+obtuvo un pico de -6,02 dBFS, un RMS de -22,57 dBFS y 0 muestras con clipping.
+
+La evidencia completa se encuentra en [`docs/m1/evidencia.md`](docs/m1/evidencia.md).
 
 ## Linter y formato
 

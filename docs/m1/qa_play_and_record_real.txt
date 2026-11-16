@@ -1,8 +1,18 @@
+Validacion real de play_and_record
+===================================
+Entrada: Analogue 1 + 2 (3- Focusrite Us
+Salida: Altavoces (3- Focusrite Usb Aud
+Canales de entrada usados: 1
+Canales de salida usados: 2
 Frecuencia de muestreo: 48000 Hz
-Duracion tono: 0.5 s
-Duracion grabada: 1.5 s
-Muestras grabadas: 72000
-Maximo: 0.0030517578125
-RMS: 0.000604360131546855
-Dispositivo entrada: Focusrite Analogue 1 + 2
-Dispositivo salida: Focusrite Altavoces
+Blocksize: 0 (automatico / PortAudio)
+Duracion sweep: 5.0 s
+Duracion grabacion: 7.0 s
+Pre-roll: 0.5 s
+Nivel digital sweep: 0.1
+Muestras grabadas: 336000
+Pico: 0.500061035
+Pico: -6.02 dBFS
+RMS: 0.074422577
+RMS: -22.57 dBFS
+Muestras con clipping: 0
