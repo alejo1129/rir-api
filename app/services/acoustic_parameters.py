@@ -194,7 +194,10 @@ def _decay_time(
     return float(-60.0 / slope)
 
 
-def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[float, float | None]]:
+def calculate_parameters_from_ir(
+    ir: np.ndarray,
+    fs: int,
+) -> dict[str, dict[float, float | None]]:
     """Calcula los parametros acusticos ISO 3382 por banda de octava.
 
     Parametros: EDT (0 a -10 dB), T10 (-5 a -15 dB), T20 (-5 a -25 dB),
@@ -225,9 +228,6 @@ def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[floa
         "C80": {},
     }
 
-    idx_50ms = min(len(sig), int(0.050 * fs))
-    idx_80ms = min(len(sig), int(0.080 * fs))
-
     for fc in OCTAVE_BANDS:
         if fc * np.sqrt(2.0) >= fs / 2.0:
             continue
@@ -241,13 +241,18 @@ def calculate_parameters_from_ir(ir: np.ndarray, fs: int) -> dict[str, dict[floa
         results["T20"][fc] = _decay_time(t, edc, -5.0, -25.0, dynamic_range_db)
         results["T30"][fc] = _decay_time(t, edc, -5.0, -35.0, dynamic_range_db)
 
+        n0 = int(np.argmax(np.abs(band_ir)))
+        idx_50ms = min(len(band_ir), n0 + int(0.050 * fs))
+        idx_80ms = min(len(band_ir), n0 + int(0.080 * fs))
+
         sq = band_ir**2
-        total_energy = float(np.sum(sq))
+        total_energy = float(np.sum(sq[n0:]))
+
         if total_energy > 0:
-            early_50 = float(np.sum(sq[:idx_50ms]))
+            early_50 = float(np.sum(sq[n0:idx_50ms]))
             d50 = (early_50 / total_energy) * 100.0
 
-            early_80 = float(np.sum(sq[:idx_80ms]))
+            early_80 = float(np.sum(sq[n0:idx_80ms]))
             late_80 = max(float(np.sum(sq[idx_80ms:])), 1e-12)
             c80 = 10.0 * np.log10(max(early_80, 1e-12) / late_80)
         else:
