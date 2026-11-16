@@ -19,7 +19,8 @@ def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.n
     fs : int
         Frecuencia de muestreo en Hz.
     record_duration : float
-        Duracion total de la grabacion en segundos.
+        Duracion total de la grabacion en segundos. La reproduccion incluye
+        0.5 s de silencio inicial como pre-roll.
 
     Returns
     -------
@@ -40,19 +41,27 @@ def play_and_record(signal: np.ndarray, fs: int, record_duration: float) -> np.n
             "y los drivers PortAudio esten correctamente instalados."
         ) from err
 
-    # Calcular el numero total de muestras a grabar
+    # Calcular el numero total de muestras a grabar.
     num_samples = int(record_duration * fs)
 
-    # Completar la señal con silencio si dura menos que la grabacion
-    if len(signal) < num_samples:
-        pad_len = num_samples - len(signal)
+    # Agregar 0.5 s de pre-roll para compensar la latencia del sistema de audio.
+    pre_roll_samples = int(0.5 * fs)
 
-        if signal.ndim == 1:
-            signal_to_play = np.pad(signal, (0, pad_len))
-        else:
-            signal_to_play = np.pad(signal, ((0, pad_len), (0, 0)))
+    if signal.ndim == 1:
+        signal_with_preroll = np.pad(signal, (pre_roll_samples, 0))
     else:
-        signal_to_play = signal[:num_samples]
+        signal_with_preroll = np.pad(signal, ((pre_roll_samples, 0), (0, 0)))
+
+    # Completar con silencio hasta record_duration o recortar si es necesario.
+    if len(signal_with_preroll) < num_samples:
+        pad_len = num_samples - len(signal_with_preroll)
+
+        if signal_with_preroll.ndim == 1:
+            signal_to_play = np.pad(signal_with_preroll, (0, pad_len))
+        else:
+            signal_to_play = np.pad(signal_with_preroll, ((0, pad_len), (0, 0)))
+    else:
+        signal_to_play = signal_with_preroll[:num_samples]
 
     try:
         recorded = sd.playrec(
