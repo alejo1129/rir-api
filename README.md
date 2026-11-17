@@ -333,7 +333,7 @@ La suite completa de pruebas se mantiene en verde.
 
 Estado actual verificado:
 
-- **74 tests aprobados**
+- **80 tests aprobados**
 - **0 tests fallidos**
 - **0 XFAIL pendientes**
 
@@ -349,32 +349,66 @@ Las evidencias detalladas, las gráficas y la metodología de validación se enc
 
 - [x] `apply_smoothing()`, `apply_schroeder_integral()`, `linear_regression()` y `calculate_parameters_from_ir()` implementadas en `app/services/acoustic_parameters.py`.
 - [x] Endpoints `POST /api/v1/acoustics/parameters`, `POST /api/v1/utils/schroeder` y `POST /api/v1/utils/smoothing` implementados.
-- [x] Tests de análisis y API aprobados: 80 tests pasando.
-- [x] Sección "Validación" documentada en este README y registro `AI_LOG.md` incorporado.
-- [ ] Comparación final de resultados por banda con software de referencia y presentación oral.
-- [ ] Publicación de la versión final `v1.0.0`.
+- [x] Tests de análisis y API aprobados: 80 tests pasando (95 % de cobertura).
+- [x] Sección "Validación" documentada en este README y registro [`AI_LOG.md`](AI_LOG.md) incorporado.
+- [x] Comparación final de resultados por banda con software de referencia y presentación oral.
+- [x] Publicación de la versión final `v1.0.0`.
 - [ ] (Opcional) `apply_lundeby()`.
+
+#### Endpoints implementados en M3
+
+`POST /api/v1/acoustics/parameters` — Calcula EDT, T10, T20, T30, D50 y C80 por banda de octava:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/acoustics/parameters" -F "file=@docs/m2/audio/ri_t60_largo_stairwell.wav"
+```
+
+`POST /api/v1/utils/schroeder` — Calcula la curva de decaimiento energético (EDC) en dB:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/utils/schroeder" -F "file=@docs/m2/audio/ri_t60_largo_stairwell.wav"
+```
+
+`POST /api/v1/utils/smoothing` — Calcula la envolvente suavizada (`hilbert` o `moving_average`):
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/utils/smoothing" -F "file=@docs/m2/audio/ri_t60_largo_stairwell.wav" -F "method=hilbert" -F "window_ms=10"
+```
+
+#### Validación de M3
+
+Se validó el cálculo de parámetros acústicos ISO 3382 sobre una RI sintética multibanda (ajuste lineal R² = 0,99618) y sobre la RI real de escalera (`ri_t60_largo_stairwell.wav`):
+
+| Banda (Hz) | T60 objetivo (s) | T30 calculado (s) | Error relativo |
+| ---: | ---: | ---: | ---: |
+| 125 | 1,80 | 1,896 | 5,3 % |
+| 250 | 1,70 | 1,748 | 2,8 % |
+| 500 | 1,60 | 1,573 | 1,7 % |
+| 1000 | 1,50 | 1,527 | 1,8 % |
+| 2000 | 1,30 | 1,306 | 0,5 % |
+| 4000 | 1,10 | 1,101 | 0,1 % |
+
+Las gráficas y tablas completas se encuentran en [`docs/m3/evidencia.md`](docs/m3/evidencia.md) y [`docs/m3/resultados_parametros.csv`](docs/m3/resultados_parametros.csv).
 
 ## Tests
 
 La suite automatizada cubre las funcionalidades implementadas desde M0 hasta M3.
 
-Estado verificado localmente:
-
 - **80 tests aprobados**
 - **0 tests fallidos**
-- **Cobertura total de los módulos principales de M3: 94 %**
+- **Cobertura total del proyecto: 95 %**
   - `app/routers/acoustics.py`: 100 %
   - `app/routers/utils.py`: 88 %
   - `app/services/acoustic_parameters.py`: 95 %
 
 No existen marcas `xfail` activas en los tests actuales.
 
-Para ejecutar las pruebas:
-
 ```bash
 uv run pytest -q
 uv run pytest -q --cov=app
+```
+
+`play_and_record()` se testea automáticamente con un *mock* de `sounddevice` en CI. Además, se realizó una validación con hardware real utilizando una interfaz Focusrite USB Audio: entrada Analogue 1 + 2 por el canal 1, salida Altavoces por 2 canales, `fs = 48000 Hz`, `blocksize = 0` (automático / PortAudio) y un pre-roll de 0,5 s. La prueba utilizó un sine sweep logarítmico de 20 Hz a 20 kHz durante 5 s, obteniendo un pico de -6,02 dBFS, un RMS de -22,57 dBFS y 0 muestras con clipping (ver [`docs/m1/evidencia.md`](docs/m1/evidencia.md)).
 
 ## Linter y formato
 
@@ -384,21 +418,15 @@ uv run ruff check --fix app/ tests/    # corregir lo automatico
 uv run ruff format app/ tests/         # formatear
 ```
 
-El CI (`.github/workflows/ci.yml`) corre `ruff check`, `ruff format --check` y
-`pytest --cov=app` en cada push a `main` y en cada pull request.
+El CI (`.github/workflows/ci.yml`) corre `ruff check`, `ruff format --check` y `pytest --cov=app` en cada push a `main` y en cada pull request.
 
 ## Configuracion
 
-`app/settings.py` define la configuracion con `pydantic-settings`. Cualquier valor se puede
-sobreescribir con variables de entorno con prefijo `RIR_` (por ejemplo `RIR_FS_DEFAULT=44100`)
-o con un archivo `.env` en la raiz (ignorado por git).
+`app/settings.py` define la configuracion con `pydantic-settings`. Cualquier valor se puede sobreescribir con variables de entorno con prefijo `RIR_` (por ejemplo `RIR_FS_DEFAULT=44100`) o con un archivo `.env` en la raiz (ignorado por git).
 
 ## Referencias
 
 - ISO 3382-1:2009 — Acoustics — Measurement of room acoustic parameters.
-- Farina, A. (2000). *Simultaneous measurement of impulse response and distortion with a
-  swept-sine technique.* 108th AES Convention.
+- Farina, A. (2000). *Simultaneous measurement of impulse response and distortion with a swept-sine technique.* 108th AES Convention.
 - Schroeder, M. R. (1965). *New method of measuring reverberation time.* JASA 37(3).
-- [FastAPI](https://fastapi.tiangolo.com/) · [Pydantic](https://docs.pydantic.dev/) ·
-  [uv](https://docs.astral.sh/uv/)
-
+- [FastAPI](https://fastapi.tiangolo.com/) · [Pydantic](https://docs.pydantic.dev/) · [uv](https://docs.astral.sh/uv/)
