@@ -15,7 +15,6 @@ def apply_smoothing(
     signal: np.ndarray, fs: int, method: str = "hilbert", window_ms: float = 10
 ) -> np.ndarray:
     """Suaviza una senal y devuelve su envolvente en **amplitud**.
-
     Parameters
     ----------
     signal : np.ndarray
@@ -26,7 +25,6 @@ def apply_smoothing(
         ``'hilbert'`` (por defecto) o ``'moving_average'``.
     window_ms : float, optional
         Largo de la ventana de media movil en milisegundos (por defecto 10 ms).
-
     Returns
     -------
     np.ndarray
@@ -43,7 +41,6 @@ def apply_smoothing(
     if method == "hilbert":
         analytic_signal = sps.hilbert(sig)
         return np.abs(analytic_signal).astype(np.float64)
-
     if method == "moving_average":
         if window_ms <= 0:
             raise ValueError("window_ms debe ser mayor que cero.")
@@ -52,7 +49,6 @@ def apply_smoothing(
         # Envolvente RMS mediante la raiz de la media movil de signal**2
         mean_sq = np.convolve(sig**2, kernel, mode="same")
         return np.sqrt(np.maximum(mean_sq, 0.0)).astype(np.float64)
-
     raise ValueError(f"Metodo no soportado: {method}. Use 'hilbert' o 'moving_average'.")
 
 
@@ -66,7 +62,6 @@ def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
     ----------
     ir : np.ndarray
         Respuesta al impulso (o RI filtrada por banda, array 1D).
-
     Returns
     -------
     np.ndarray
@@ -82,7 +77,6 @@ def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
 
     if ir.ndim != 1 or ir.size == 0:
         raise ValueError("La respuesta al impulso debe ser un array 1D no vacio")
-
     if not np.all(np.isfinite(ir)):
         raise ValueError("La respuesta al impulso debe contener valores finitos")
 
@@ -97,7 +91,6 @@ def apply_schroeder_integral(ir: np.ndarray) -> np.ndarray:
     # Integracion inversa de la energia.
     energy = normalized_ir**2
     edc = np.cumsum(energy[::-1])[::-1]
-
     # Normalizar la energia y convertirla a decibeles.
     with np.errstate(divide="ignore"):
         edc_db = 10.0 * np.log10(edc / edc[0])
@@ -114,7 +107,6 @@ def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float
         Variable independiente (tipicamente tiempo en segundos).
     y : np.ndarray
         Variable dependiente (tipicamente curva de Schroeder en dB).
-
     Returns
     -------
     slope : float
@@ -132,7 +124,6 @@ def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float
 
     dx = x_arr - x_mean
     dy = y_arr - y_mean
-
     ss_xx = float(np.sum(dx * dx))
     ss_yy = float(np.sum(dy * dy))
     ss_xy = float(np.sum(dx * dy))
@@ -149,7 +140,6 @@ def linear_regression(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float
         y_pred = slope * x_arr + intercept
         ss_res = float(np.sum((y_arr - y_pred) ** 2))
         r2 = max(0.0, 1.0 - (ss_res / ss_yy))
-
     return float(slope), float(intercept), float(r2)
 
 
@@ -167,7 +157,6 @@ def _estimate_dynamic_range_db(signal: np.ndarray) -> float:
 
     if noise_power <= 0.0:
         return float("inf")
-
     return float(10.0 * np.log10(peak_power / noise_power))
 
 
@@ -182,7 +171,6 @@ def _decay_time(
     required_dynamic_range_db = abs(db_end) + 10.0
     if dynamic_range_db < required_dynamic_range_db:
         return None
-
     mask = np.isfinite(edc_db) & (edc_db <= db_start) & (edc_db >= db_end)
     if np.count_nonzero(mask) < 2:
         return None
@@ -199,7 +187,6 @@ def calculate_parameters_from_ir(
     fs: int,
 ) -> dict[str, dict[float, float | None]]:
     """Calcula los parametros acusticos ISO 3382 por banda de octava.
-
     Parametros: EDT (0 a -10 dB), T10 (-5 a -15 dB), T20 (-5 a -25 dB),
     T30 (-5 a -35 dB), D50 (%) y C80 (dB).
 
@@ -209,7 +196,6 @@ def calculate_parameters_from_ir(
         Respuesta al impulso (array 1D).
     fs : int
         Frecuencia de muestreo en Hz.
-
     Returns
     -------
     dict[str, dict[float, float | None]]
@@ -221,8 +207,8 @@ def calculate_parameters_from_ir(
     pretrigger_samples = int(0.005 * fs)
     start_idx = max(0, peak_idx - pretrigger_samples)
     sig = sig[start_idx:]
+    direct_idx = int(np.argmax(np.abs(sig)))
     t = np.arange(len(sig), dtype=np.float64) / fs
-
     results: dict[str, dict[float, float | None]] = {
         "EDT": {},
         "T10": {},
@@ -239,30 +225,26 @@ def calculate_parameters_from_ir(
         band_ir = filter_single_band(sig, fs, float(fc))
         edc = apply_schroeder_integral(band_ir)
         dynamic_range_db = _estimate_dynamic_range_db(band_ir)
-
         results["EDT"][fc] = _decay_time(t, edc, 0.0, -10.0, dynamic_range_db)
         results["T10"][fc] = _decay_time(t, edc, -5.0, -15.0, dynamic_range_db)
         results["T20"][fc] = _decay_time(t, edc, -5.0, -25.0, dynamic_range_db)
         results["T30"][fc] = _decay_time(t, edc, -5.0, -35.0, dynamic_range_db)
 
-        n0 = int(np.argmax(np.abs(band_ir)))
-        idx_50ms = min(len(band_ir), n0 + int(0.050 * fs))
-        idx_80ms = min(len(band_ir), n0 + int(0.080 * fs))
-
+        idx_50ms = min(len(band_ir), direct_idx + int(0.050 * fs))
+        idx_80ms = min(len(band_ir), direct_idx + int(0.080 * fs))
         sq = band_ir**2
-        total_energy = float(np.sum(sq[n0:]))
+        total_energy = float(np.sum(sq[direct_idx:]))
 
         if total_energy > 0:
-            early_50 = float(np.sum(sq[n0:idx_50ms]))
+            early_50 = float(np.sum(sq[direct_idx:idx_50ms]))
             d50 = (early_50 / total_energy) * 100.0
 
-            early_80 = float(np.sum(sq[n0:idx_80ms]))
+            early_80 = float(np.sum(sq[direct_idx:idx_80ms]))
             late_80 = max(float(np.sum(sq[idx_80ms:])), 1e-12)
             c80 = 10.0 * np.log10(max(early_80, 1e-12) / late_80)
         else:
             d50 = 0.0
             c80 = 0.0
-
         results["D50"][fc] = float(d50)
         results["C80"][fc] = float(c80)
 
