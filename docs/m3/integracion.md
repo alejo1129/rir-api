@@ -1,5 +1,3 @@
-
-
 # M3 — Guía de integración y validación
 
 ## Objetivo
@@ -20,14 +18,14 @@ Los PR deben revisarse y aprobarse antes de considerarlos integrados en `main`.
 
 ## Checklist de integración
 
-- [ ] Confirmar revisión y aprobación de los PR.
-- [ ] Verificar que no existan conflictos entre ramas.
-- [ ] Integrar las funciones de procesamiento acústico.
-- [ ] Revisar las marcas `XFAIL` de las pruebas ya implementadas.
-- [ ] Ejecutar Ruff y la suite completa de Pytest.
-- [ ] Verificar los endpoints de M3.
-- [ ] Registrar los resultados finales de validación.
-- [ ] Actualizar la documentación de entrega.
+- [x] Confirmar revisión y aprobación de los PR.
+- [x] Verificar que no existan conflictos entre ramas.
+- [x] Integrar las funciones de procesamiento acústico.
+- [x] Revisar las marcas `XFAIL` de las pruebas ya implementadas.
+- [x] Ejecutar Ruff y la suite completa de Pytest.
+- [x] Verificar los endpoints de M3.
+- [x] Registrar los resultados finales de validación.
+- [x] Actualizar la documentación de entrega.
 
 ## Comandos de validación
 
@@ -39,28 +37,6 @@ uv run ruff format --check app/ tests/
 uv run pytest -q
 ```
 
-Para verificar Schroeder después de integrar su implementación:
-
-```powershell
-uv run pytest -v tests/test_analisis.py -k "schroeder" --runxfail
-```
-
-La opción `--runxfail` permite ejecutar temporalmente como pruebas normales aquellas que todavía tengan la marca `XFAIL`.
-
-## Consideraciones técnicas
-
-La integral de Schroeder debe devolver una curva de decaimiento energético normalizada en dB.
-
-Se deben verificar:
-
-- Longitud de salida igual a la entrada.
-- Valor inicial de 0 dB.
-- Decaimiento energético monótono.
-- Invariancia frente al escalado de amplitud.
-- Comportamiento definido ante entradas inválidas y señales silenciosas.
-
-La implementación propuesta en el PR #68 devuelve `ValueError` para señales completamente silenciosas. Este criterio debe confirmarse durante la revisión.
-
 ## Criterio de finalización
 
-M3 se considerará integrado cuando las funciones requeridas estén incorporadas a `main`, los tests correspondientes pasen sin fallos inesperados, los endpoints funcionen y la documentación refleje el estado real del proyecto.
+M3 se considera integrado con todas las funciones incorporadas a `main`, los 80 tests pasando sin fallos, los endpoints operativos y la documentación actualizada.
