@@ -5,7 +5,10 @@ description = "API REST para procesamiento y analisis de respuestas al impulso s
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [
-    { name = "Estudiante", email = "estudiante@example.com" },
+    { name = "Alejo Fernandez" },
+    { name = "Ignacio Garcia Nizza" },
+    { name = "Julian Prieto" },
+    { name = "Mauricio Luque" },
 ]
 dependencies = [
     "fastapi",
