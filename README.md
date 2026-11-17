@@ -347,48 +347,34 @@ Las evidencias detalladas, las gráficas y la metodología de validación se enc
 
 ### M3 · Producto final (`v1.0.0`)
 
-- [ ] `apply_smoothing()`, `apply_schroeder_integral()`, `linear_regression()` y
-      `calculate_parameters_from_ir()` en `app/services/acoustic_parameters.py`.
-- [ ] Endpoints `POST /api/v1/acoustics/parameters`, `POST /api/v1/utils/schroeder` y
-      `POST /api/v1/utils/smoothing`: la API completa.
-- [ ] Tests de `tests/test_analisis.py` y todos los de `tests/test_api.py` pasando.
-- [ ] Seccion "Validacion" en este README, `AI_LOG.md` y presentacion oral.
+- [x] `apply_smoothing()`, `apply_schroeder_integral()`, `linear_regression()` y `calculate_parameters_from_ir()` implementadas en `app/services/acoustic_parameters.py`.
+- [x] Endpoints `POST /api/v1/acoustics/parameters`, `POST /api/v1/utils/schroeder` y `POST /api/v1/utils/smoothing` implementados.
+- [x] Tests de análisis y API aprobados: 80 tests pasando.
+- [x] Sección "Validación" documentada en este README y registro `AI_LOG.md` incorporado.
+- [ ] Comparación final de resultados por banda con software de referencia y presentación oral.
+- [ ] Publicación de la versión final `v1.0.0`.
 - [ ] (Opcional) `apply_lundeby()`.
 
 ## Tests
 
-En el estado actual del proyecto, los tests correspondientes a M0, M1 y M2 ya se encuentran activos y aprobados. Las marcas `xfail` solo deben mantenerse para funcionalidades futuras que todavía no estén implementadas.
+La suite automatizada cubre las funcionalidades implementadas desde M0 hasta M3.
 
+Estado verificado localmente:
 
-Las funciones de `app/services/` vienen como *stubs* que lanzan `NotImplementedError`. Sus
-tests estan marcados como `xfail` (fallo esperado), asi el CI queda en verde desde el
-primer dia:
+- **80 tests aprobados**
+- **0 tests fallidos**
+- **Cobertura total de los módulos principales de M3: 94 %**
+  - `app/routers/acoustics.py`: 100 %
+  - `app/routers/utils.py`: 88 %
+  - `app/services/acoustic_parameters.py`: 95 %
 
-- Mientras la funcion no este implementada, el test aparece como `x` (xfailed).
-- Cuando la implementen bien, aparece como `X` (xpassed). En ese momento conviene **borrar
-  la marca `xfail`** del modulo de tests (`pytestmark = ...`) para que el test cuente como
-  un test normal. En `tests/test_api.py` la marca va test por test (`@xfail_m1`,
-  `@xfail_m2`, `@xfail_m3`): borren la de cada endpoint que implementen.
-- Si la implementacion es incorrecta, el test **falla** (rojo) con el `AssertionError`.
+No existen marcas `xfail` activas en los tests actuales.
+
+Para ejecutar las pruebas:
 
 ```bash
-uv run pytest                                  # todos los tests
-uv run pytest -v tests/test_generacion.py      # un archivo, con detalle
-uv run pytest -v -k pink_noise                 # tests cuyo nombre contiene "pink_noise"
-uv run pytest -rxX                             # listar xfailed / xpassed
-uv run pytest --cov=app                        # con cobertura
-```
-
-`play_and_record()` se testea automáticamente con un *mock* de `sounddevice`, por lo que
-el CI no requiere hardware de audio. Además, se realizó una validación con hardware real
-utilizando una interfaz Focusrite: entrada Analogue 1 + 2 por el canal 1, salida Altavoces
-por 2 canales, `fs = 48000 Hz`, `blocksize = 0` (automático / PortAudio) y un pre-roll de
-0,5 s.
-
-La prueba utilizó un sine sweep logarítmico de 20 Hz a 20 kHz durante 5 s. La grabación
-obtuvo un pico de -6,02 dBFS, un RMS de -22,57 dBFS y 0 muestras con clipping.
-
-La evidencia completa se encuentra en [`docs/m1/evidencia.md`](docs/m1/evidencia.md).
+uv run pytest -q
+uv run pytest -q --cov=app
 
 ## Linter y formato
 
