@@ -72,14 +72,14 @@ flowchart TB
         RAH["audio_http.py<br/>wav_response<br/>uploaded_file"]
         RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep<br/>POST /signals/synthetic-ir"]
         RF["filters.py<br/>POST /filters/single-band"]
-        RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
+        RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder"]
         RA["acoustics.py<br/>POST /acoustics/parameters"]
     end
 
     subgraph SC["app/schemas/ · Pydantic"]
-        SR["responses.py<br/>HealthResponse<br/>BandAnalysisResponse"]
+        SR["responses.py<br/>BandAnalysisResponse"]
         SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest<br/>SyntheticIRRequest"]
-        SU["utils.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
+        SU["utils.py<br/>SmoothingMethod<br/>SmoothingResponse<br/>SchroederResponse"]
     end
 
     subgraph SV["app/services/"]
@@ -94,7 +94,6 @@ flowchart TB
     L["Librerías de procesamiento<br/>NumPy · SciPy · sounddevice · soundfile"]
 
 C -->|"GET /health"| RH
-RH -->|"response_model"| SR
 RH -->|"JSON"| C
 
 C -->|"datos JSON"| RS
@@ -111,8 +110,8 @@ RF -->|"load_audio"| SIG
 RF -->|"filter_single_band"| FIL
 RF -->|"WAV"| C
 
-C -->|"datos JSON"| RU
-RU -->|"valida request"| SU
+C -->|"WAV + Form"| RU
+RU -->|"response_model"| SU
 RU -->|"apply_smoothing / apply_schroeder_integral"| AC
 RU -->|"JSON"| C
 

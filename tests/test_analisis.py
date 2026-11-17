@@ -1,8 +1,4 @@
-"""Tests para los servicios de analisis de parametros acusticos (Milestone 3).
-
-Mientras las funciones lancen ``NotImplementedError`` estos tests quedan como
-``xfail`` (no ponen el CI en rojo).
-"""
+"""Tests unitarios para los servicios de analisis de parametros acusticos (Milestone 3)."""
 
 import numpy as np
 import pytest
