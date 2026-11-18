@@ -33,7 +33,7 @@ Para ambas señales se calcularon EDT, T10, T20, T30, D50 y C80 en las seis band
 
 Resultados del ajuste entre -5 y -35 dB:
 
-- **Pendiente:** -35,0238 dB/s
+- **Pendiente de regresión:** -35,0238 dB/s
 - **Intercepto:** registrado en `validacion_schroeder.csv`
 - **Coeficiente de determinación:** R² = 0,99618
 
@@ -93,7 +93,7 @@ El archivo `comparacion_rew.csv` contiene los valores actuales de RIR-API, las d
 
 Para EDT, T20 y T30 se aplicó una tolerancia absoluta igual a `min(0.1 × |referencia|, 0.5 s)`. Para C80 se utilizó ±1 dB. Se computó el error absoluto en cada banda. **Un resultado dentro de tolerancia no equivale a identidad metodológica** entre programas.
 
-En la rama de corrección de M3, D50 y C80 utilizan un mismo índice de referencia temporal, determinado por el máximo absoluto de la RI broadband luego de conservar un pretrigger de 5 ms. Los tiempos de decaimiento usan filtrado por banda, integración inversa de Schroeder y regresión lineal. La comparación se hizo antes de integrar el PR pendiente, por lo que debe repetirse después si cambia el código de producción.
+En la versión final integrada en `main`, D50 y C80 utilizan un mismo índice de referencia temporal, determinado por el máximo absoluto de la RI broadband luego de conservar un pretrigger de 5 ms. Los tiempos de decaimiento usan filtrado por banda, integración inversa de Schroeder y regresión lineal. La comparación con REW y ARTA corresponde a la versión final del código integrada en los PR #94 y #96.
 
 ### 5.2 Resultado global
 
@@ -186,7 +186,7 @@ En la rama de corrección de M3, D50 y C80 utilizan un mismo índice de referenc
 - La comparación profesional de este apartado cubre **EDT, T20, T30 y C80**; no incluye una comparación externa de D50 y T10, aunque ambos están calculados en `resultados_parametros.csv`. El CSV sintético y el de Stairwell contienen 72 valores y pasaron auditoría interna de coherencia con la API (72/72, umbral de discrepancia `1e-6`).
 - Los resultados profesionales se transcriben redondeados a tres decimales desde la ejecución de `tmp_m3_comparacion_actual.py` del 17/11/2026. Los errores y tolerancias mostrados también se redondean; una decisión cerca del umbral debe corroborarse con los valores sin redondear.
 - Las cuatro discrepancias se declaran explícitamente; **no se presentan como aprobadas**. El objetivo de las pruebas de sensibilidad fue investigar causas, no optimizar cifras contra un software de referencia.
-- Los gráficos existentes en `docs/m3/images/` deben verificarse antes de presentarse como reflejo de esta versión de la API. En particular, `validacion_vs_rew_t30.png` representa una comparación específica, no el conjunto de 48 resultados.
+- Los gráficos de `docs/m3/images/` documentan aspectos específicos del procesamiento y la validación. En particular, `validacion_vs_rew_t30.png` representa la comparación de T30 frente a REW y no el conjunto completo de 48 resultados, que se encuentra documentado en las tablas de esta sección.
 
 ### 5.6 Conclusión
 

@@ -8,8 +8,8 @@ Registro estructurado de las consultas realizadas a asistentes de inteligencia a
 - **Fecha y Milestone:** 05/10/2026 ? Milestone 0 (El plano)
 - **Herramienta:** ChatGPT (OpenAI) / Gemini (Google)
 - **Consulta realizada:** C?mo estructurar la separaci?n de responsabilidades entre routers HTTP (`FastAPI`), esquemas (`Pydantic`) y servicios (`NumPy`/`SciPy`), y c?mo diagramar el flujo de datos en Mermaid.
-- **Resultado obtenido:** Esqueleto de paquetes (`app/routers`, `app/schemas`, `app/services`) y diagrama `flowchart TB` con las conexiones entre capas.
-- **Evaluaci?n:** Fue ?til para establecer la base del proyecto. Se modificaron las etiquetas de las flechas para indicar el nombre exacto de cada funci?n invocada y se aprendi? a aislar la conversi?n de archivos WAV temporales en `audio_http.py`.
+- **Resultado obtenido:** Esqueleto de paquetes (app/routers, app/schemas, app/services) y diagrama flowchart TB con las conexiones entre capas.
+- **Evaluación:** Fue útil para establecer la base del proyecto. Se modificaron las etiquetas de las flechas para indicar el nombre exacto de cada función invocada y se aprendió a aislar la conversión de archivos WAV temporales en audio_http.py.
 
 ## Entrada 2 ? Algoritmo de Voss-McCartney y filtro inverso de Farina
 - **Fecha y Milestone:** 22/10/2026 ? Milestone 1 (Generaci?n de se?ales)
@@ -36,12 +36,12 @@ Registro estructurado de las consultas realizadas a asistentes de inteligencia a
 - **Fecha y Milestone:** 03/11/2026 y 16/11/2026 ? Milestone 2 y Milestone 3
 - **Herramienta:** ChatGPT / Gemini
 - **Consulta realizada:** Efecto del recorte exacto en el pico directo sobre el transitorio de los filtros IIR bidireccionales (`sosfiltfilt`) en bandas bajas.
-- **Resultado obtenido:** Recomendaci?n de conservar un margen de ~5 ms previo al pico m?ximo tanto en `get_impulse_response()` como al inicio de `calculate_parameters_from_ir()`.
-- **Evaluaci?n:** Fundamental para estabilizar el EDT en 125 Hz y 250 Hz. Se implement? `start_idx = max(0, peak_idx - pretrigger_samples)` y se agregaron los tests unitarios de pre-trigger y silencio inicial.
+- **Resultado obtenido:** Recomendación de conservar un margen de ~5 ms previo al pico máximo tanto en `get_impulse_response()` como al inicio de `calculate_parameters_from_ir()`.
+- **Evaluación:** Fundamental para estabilizar el EDT en 125 Hz y 250 Hz. Se implementó `start_idx = max(0, peak_idx - pretrigger_samples)` y se agregaron los tests unitarios de pre-trigger y silencio inicial.
 
 ## Entrada 6 ? Integral de Schroeder, criterio de rango din?mico y D50/C80 desde arribo directo
 - **Fecha y Milestone:** 14/11/2026 al 17/11/2026 ? Milestone 3 (Producto final)
 - **Herramienta:** ChatGPT / Gemini
 - **Consulta realizada:** C?lculo de EDT, T10, T20, T30, D50 y C80 seg?n ISO 3382-1, verificaci?n de rango din?mico m?nimo (`abs(db_end) + 10 dB`) y punto de inicio para integraci?n de energ?a temprana/tard?a.
-- **Resultado obtenido:** Implementaci?n de `_estimate_dynamic_range_db()`, retorno de `None` (`null` en JSON) cuando la relaci?n se?al/ruido es insuficiente, e inicio de integraci?n de D50 y C80 desde el pico de cada banda filtrada (`n0 = np.argmax(np.abs(band_ir))`).
-- **Evaluaci?n:** Inicialmente D50 y C80 se integraban desde el ?ndice 0 (incluyendo el pre-trigger de 5 ms), lo que introduc?a diferencias en C80 frente a software de referencia. Se corrigi? en el PR #88 tomando `n0` por banda y se verific? con tests unitarios y de contrato OpenAPI.
+- **Resultado obtenido:** Implementación de `_estimate_dynamic_range_db()`, retorno de `None` (`null` en JSON) cuando la relación señal/ruido es insuficiente y cálculo de D50 y C80 utilizando una referencia temporal broadband común a todas las bandas filtradas.
+- **Evaluación:** Durante el desarrollo se probaron distintos criterios de inicio de integración. La versión final unificó la referencia temporal para todas las bandas, evitando utilizar un pico independiente por banda. La corrección se integró en el PR #94 y se verificó mediante tests y validaciones frente a software profesional (REW y ARTA).
