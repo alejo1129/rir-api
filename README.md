@@ -72,14 +72,14 @@ flowchart TB
         RAH["audio_http.py<br/>wav_response<br/>uploaded_file"]
         RS["signals.py<br/>POST /signals/pink-noise<br/>POST /signals/sine-sweep<br/>POST /signals/synthetic-ir"]
         RF["filters.py<br/>POST /filters/single-band"]
-        RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder"]
+        RU["utils.py<br/>POST /utils/smoothing<br/>POST /utils/schroeder<br/>POST /utils/lundeby"]
         RA["acoustics.py<br/>POST /acoustics/parameters"]
     end
 
     subgraph SC["app/schemas/ · Pydantic"]
-        SR["responses.py<br/>BandAnalysisResponse"]
+        SR["responses.py<br/>HealthResponse<br/>BandAnalysisResponse"]
         SS["signals.py<br/>PinkNoiseRequest<br/>SineSweepRequest<br/>SyntheticIRRequest"]
-        SU["utils.py<br/>SmoothingMethod<br/>SmoothingResponse<br/>SchroederResponse"]
+        SU["utils.py<br/>SmoothingRequest<br/>SchroederResponse<br/>LundebyResponse"]
     end
 
     subgraph SV["app/services/"]
@@ -94,6 +94,7 @@ flowchart TB
     L["Librerías de procesamiento<br/>NumPy · SciPy · sounddevice · soundfile"]
 
 C -->|"GET /health"| RH
+RH -->|"response_model"| SR
 RH -->|"JSON"| C
 
 C -->|"datos JSON"| RS
@@ -110,8 +111,8 @@ RF -->|"load_audio"| SIG
 RF -->|"filter_single_band"| FIL
 RF -->|"WAV"| C
 
-C -->|"WAV + Form"| RU
-RU -->|"response_model"| SU
+C -->|"datos JSON"| RU
+RU -->|"valida request"| SU
 RU -->|"apply_smoothing / apply_schroeder_integral"| AC
 RU -->|"JSON"| C
 
@@ -332,7 +333,7 @@ La suite completa de pruebas se mantiene en verde.
 
 Estado actual verificado:
 
-- **80 tests aprobados**
+- **81 tests aprobados**
 - **0 tests fallidos**
 - **0 XFAIL pendientes**
 
@@ -348,7 +349,7 @@ Las evidencias detalladas, las gráficas y la metodología de validación se enc
 
 - [x] `apply_smoothing()`, `apply_schroeder_integral()`, `linear_regression()` y `calculate_parameters_from_ir()` implementadas en `app/services/acoustic_parameters.py`.
 - [x] Endpoints `POST /api/v1/acoustics/parameters`, `POST /api/v1/utils/schroeder` y `POST /api/v1/utils/smoothing` implementados.
-- [x] Tests de análisis y API aprobados: 80 tests pasando (95 % de cobertura).
+- [x] Tests de análisis y API aprobados: 81 tests pasando (95 % de cobertura).
 - [x] Sección "Validación" documentada en este README y registro [`AI_LOG.md`](AI_LOG.md) incorporado.
 - [x] Comparación final de resultados por banda con software de referencia y presentación oral.
 - [x] Publicación de la versión final `v1.0.0`.
@@ -376,10 +377,14 @@ curl -X POST "http://127.0.0.1:8000/api/v1/utils/smoothing" -F "file=@docs/m2/au
 
 #### Validación de M3
 
-Se validó el cálculo de parámetros acústicos ISO 3382 sobre una RI sintética multibanda (ajuste lineal R² = 0,99618) y sobre la RI real de escalera (`ri_t60_largo_stairwell.wav`):
+Se validó el cálculo de parámetros acústicos según ISO 3382 mediante respuestas al impulso sintéticas y reales, contrastando los resultados de RIR-API con los obtenidos en software de medición acústica profesional (REW y ARTA).
+
+**Validación con respuesta al impulso sintética**
+
+Se utilizó una RI sintética multibanda con tiempos de reverberación conocidos. La integración de Schroeder y la regresión lineal presentaron un coeficiente de determinación R² = 0,99618 en el ajuste documentado.
 
 | Banda (Hz) | T60 objetivo (s) | T30 calculado (s) | Error relativo |
-| ---: | ---: | ---: | ---: |
+|---:|---:|---:|---:|
 | 125 | 1,80 | 1,896 | 5,3 % |
 | 250 | 1,70 | 1,748 | 2,8 % |
 | 500 | 1,60 | 1,573 | 1,7 % |
@@ -387,13 +392,48 @@ Se validó el cálculo de parámetros acústicos ISO 3382 sobre una RI sintétic
 | 2000 | 1,30 | 1,306 | 0,5 % |
 | 4000 | 1,10 | 1,101 | 0,1 % |
 
-Las gráficas y tablas completas se encuentran en [`docs/m3/evidencia.md`](docs/m3/evidencia.md) y [`docs/m3/resultados_parametros.csv`](docs/m3/resultados_parametros.csv).
+**Validación con software profesional**
+
+Se utilizaron dos respuestas al impulso reales:
+
+- **Stairwell:** RI de una escalera (`ri_t60_largo_stairwell.wav`), con frecuencia de muestreo de 32 kHz. Los resultados se contrastaron con REW.
+- **Reactor R1:** RI `r1_omni_48k.wav`, con frecuencia de muestreo de 48 kHz. Los resultados se contrastaron con ARTA.
+
+Se evaluaron EDT, T20, T30 y C80 en las seis bandas de octava comprendidas entre 125 Hz y 4000 Hz.
+
+Se aplicaron las tolerancias establecidas para M3: el menor valor entre ±10 % y ±0,5 s para EDT, T20 y T30, y ±1 dB para C80.
+
+| Parámetro | Stairwell / REW | Reactor R1 / ARTA | Total |
+|---|---:|---:|---:|
+| EDT | 5/6 | 5/6 | 10/12 |
+| T20 | 6/6 | 6/6 | 12/12 |
+| T30 | 6/6 | 6/6 | 12/12 |
+| C80 | 4/6 | 6/6 | 10/12 |
+| **Total** | **21/24** | **23/24** | **44/48** |
+
+Se obtuvieron **44 comparaciones dentro de tolerancia sobre un total de 48 (91,7 %)**.
+
+Las cuatro discrepancias restantes corresponden a EDT a 4000 Hz en ambas respuestas al impulso y a C80 en las bandas de 250 Hz y 2000 Hz de Stairwell.
+
+Los diagnósticos complementarios identificaron una sensibilidad importante del EDT al comportamiento del decaimiento inicial y del C80 a la selección del origen temporal de integración. También se evaluaron variaciones del orden de filtrado y de las ventanas temporales.
+
+Estas diferencias se documentaron sin alterar arbitrariamente los algoritmos para forzar la coincidencia con los programas de referencia.
+
+La corrección de D50 y C80 utiliza una referencia temporal broadband común a todas las bandas. En Reactor R1, este procedimiento produjo diferencias de C80 comprendidas entre 0,029 y 0,116 dB respecto de ARTA.
+
+**Documentación y reproducibilidad**
+
+Los resultados calculados para la RI sintética y Stairwell se encuentran en [`docs/m3/resultados_parametros.csv`](docs/m3/resultados_parametros.csv). Sus 72 valores fueron contrastados con la implementación utilizada durante la validación.
+
+La metodología, las tablas profesionales completas, las discrepancias y las gráficas se documentan en [`docs/m3/evidencia.md`](docs/m3/evidencia.md).
+
+Las comparaciones externas presentadas comprenden EDT, T20, T30 y C80; no constituyen una validación externa exhaustiva de D50 ni T10.
 
 ## Tests
 
 La suite automatizada cubre las funcionalidades implementadas desde M0 hasta M3.
 
-- **80 tests aprobados**
+- **81 tests aprobados**
 - **0 tests fallidos**
 - **Cobertura total del proyecto: 95 %**
   - `app/routers/acoustics.py`: 100 %
