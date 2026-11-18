@@ -423,6 +423,20 @@ La corrección de D50 y C80 utiliza una referencia temporal broadband común a t
 
 **Documentación y reproducibilidad**
 
+**Evidencia gráfica del procesamiento y validación**
+
+**Curva de Schroeder y regresión lineal**
+
+![Curva de Schroeder](docs/m3/images/curva_schroeder.png)
+
+**Respuesta en frecuencia de los filtros de octava**
+
+![Comparación de filtros por bandas](docs/m3/images/comparacion_filtros_bandas.png)
+
+**Validación de T30 frente a REW**
+
+![Validación de T30 frente a REW](docs/m3/images/validacion_vs_rew_t30.png)
+
 Los resultados calculados para la RI sintética y Stairwell se encuentran en [`docs/m3/resultados_parametros.csv`](docs/m3/resultados_parametros.csv). Sus 72 valores fueron contrastados con la implementación utilizada durante la validación.
 
 La metodología, las tablas profesionales completas, las discrepancias y las gráficas se documentan en [`docs/m3/evidencia.md`](docs/m3/evidencia.md).
